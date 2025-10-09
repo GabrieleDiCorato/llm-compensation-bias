@@ -1,7 +1,7 @@
 [project]
 name = "llm-compensation-bias"
 version = "0.1.0"
-description = "Add your description here"
+description = "Exploring bias in large language models through compensation estimation experiments"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
