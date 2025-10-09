@@ -28,7 +28,7 @@ This is an exploratory analysis intended to surface patterns in specific models 
 
 ## Libraries and Frameworks
 
-- Python 3.12+ for the backend
+- Python 3.14+ for the backend
 - pydantic for data models and validation
 - pydantic-settings to define and handle configuration files
 - pandas for data analysis and manipulation
@@ -40,7 +40,7 @@ This is an exploratory analysis intended to surface patterns in specific models 
 
 - Aviod using emojis in comments.
 - Use double quotes for strings.
-- Use modern type hints (Python 3.12+)
+- Use modern type hints (Python 3.14+)
 
 ## LLM Behaviour Instructions
 
