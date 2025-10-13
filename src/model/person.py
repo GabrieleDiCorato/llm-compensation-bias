@@ -1,8 +1,11 @@
 from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 import random
+import logging
 
 from .name_pools import NAME_POOLS
+
+logger = logging.getLogger(__name__)
 
 
 class Gender(str, Enum):
@@ -118,6 +121,10 @@ class Person(BaseModel):
 
         allowed_experience = age_experience_rules.get(self.age_range, [])
         if self.experience_level not in allowed_experience:
+            logger.warning(
+                f"Inconsistent person attributes: experience level '{self.experience_level.value}' "
+                f"with age range '{self.age_range.value}'"
+            )
             raise ValueError(
                 f"Experience level '{self.experience_level.value}' is not consistent "
                 f"with age range '{self.age_range.value}'"
@@ -129,6 +136,10 @@ class Person(BaseModel):
     def validate_age_education_consistency(self) -> "Person":
         """Validate that education level is realistic for age range."""
         if self.age_range == AgeRange.AGE_18_24 and self.education_level == EducationLevel.ADVANCED:
+            logger.warning(
+                f"Inconsistent person attributes: age range '{self.age_range.value}' "
+                f"with education level '{self.education_level.value}'"
+            )
             raise ValueError(
                 f"Age range '{self.age_range.value}' is too young for "
                 f"education level '{self.education_level.value}'"

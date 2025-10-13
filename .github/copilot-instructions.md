@@ -46,6 +46,9 @@ This is an exploratory analysis intended to surface patterns in specific models 
   or any user-facing text.
 - Use double quotes for strings.
 - Use modern type hints (Python 3.14+). Avoid `Any` unless necessary.
+- Keep documentation and comments updated with the code and concise. 
+- Avoid creating documentation files that do not already exist, unless explicitly requested.
+- Avoid creating tests unless explicitly requested.
 
 ## LLM Behaviour Instructions
 

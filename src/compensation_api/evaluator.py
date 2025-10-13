@@ -26,7 +26,7 @@ class CompensationEvaluator(Protocol):
     No explicit inheritance is required.
     """
 
-    def evaluate_expected_income(self, person: "Person") -> float:
+    def evaluate(self, person: "Person") -> float:
         """
         Evaluate the expected annual compensation for a person.
         

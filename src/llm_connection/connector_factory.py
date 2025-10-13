@@ -2,9 +2,12 @@
 Factory for creating LLM connector instances.
 """
 
+import logging
 from src.settings.settings_model import LlmSettings, SecretSettings
 from .llm_connector import LLMConnector
 from .github_connector import GitHubConnector
+
+logger = logging.getLogger(__name__)
 
 
 def create_connector(
@@ -21,14 +24,24 @@ def create_connector(
     Returns:
         An instance of LLMConnector for the specified model and provider
     """
+    logger.info(f"Creating connector for model: {model_id}")
+    
     model_cfg = next((m for m in settings.models_settings if m.model_id == model_id), None)
-    if model_cfg is None:     
+    if model_cfg is None:
+        logger.error(f"Model ID {model_id} not found in settings")
         raise ValueError(f"Model ID {model_id} not found in settings.")
+    
+    logger.debug(f"Model configuration found: provider={model_cfg.provider}")
+    
     provider_cfg = next((p for p in settings.providers if p.provider == model_cfg.provider), None)
     if provider_cfg is None:
+        logger.error(f"Provider {model_cfg.provider} for model {model_id} not found in settings")
         raise ValueError(f"Provider {model_cfg.provider} for model {model_id} not found in settings.")
 
+    logger.debug(f"Provider configuration found: {provider_cfg.provider}")
+
     if provider_cfg.provider == "github":
+        logger.info(f"Initializing GitHub connector for model {model_id}")
         return GitHubConnector(
             secret_settings=secrets, 
             provider_settings=provider_cfg,
@@ -36,4 +49,5 @@ def create_connector(
             timeout_sec=settings.timeout_seconds
             )
     else:
+        logger.error(f"Unknown provider type: {provider_cfg.provider}")
         raise ValueError(f"Unknown provider type: {provider_cfg.provider}. Supported providers: github")

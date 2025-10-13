@@ -1,5 +1,8 @@
 from pydantic import BaseModel, Field, SecretStr, URL
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SecretSettings(BaseSettings):
@@ -18,6 +21,10 @@ class SecretSettings(BaseSettings):
         env_ignore_empty=True,
         env_nested_delimiter="__",
     )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        logger.info("Secret settings loaded successfully")
 
 class ModelSettings(BaseModel):
     """Configuration for a specific LLM model."""
@@ -64,3 +71,10 @@ class LlmSettings(BaseSettings):
         yaml_file="settings/config.yaml",
         nested_model_default_partial_update=True,
     )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        logger.info(f"LLM settings loaded: {len(self.providers)} providers, {len(self.models_settings)} models configured")
+        logger.info(f"Enabled models: {', '.join(self.enabled_models)}")
+        logger.info(f"Prompt strategies: {', '.join(self.prompt_strategies)}")
+        logger.debug(f"Output directory: {self.output_dir}")
