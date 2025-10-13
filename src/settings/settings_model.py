@@ -34,6 +34,7 @@ class LlmSettings(BaseSettings):
     )
 
     llm_providers: list[dict] = Field(default_factory=list)
+    prompt_directory: str = Field(default="settings/prompts", description="Directory containing prompt YAML files")
     prompt_strategies: list[str] = Field(default_factory=list)
     code_context: dict = Field(default_factory=dict)
     output: dict = Field(default_factory=dict)

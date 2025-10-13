@@ -22,7 +22,10 @@ This is an exploratory analysis intended to surface patterns in specific models 
 
 - `/src`: Contains the source code.
   - `/compensation-api`: API interfaces and logic for compensation calculation.
+  - `/llm_connection`: LLM connector implementations.
+  - `/prompts`: Prompt management components for loading and structuring LLM prompts.
   - `/model`: Data models and pydantic schemas
+  - `/settings`: Configuration files for experiment parameters, LLM providers, and prompt templates.
 - `/settings`: Contains the configuration files for experiment parameters, LLM providers, and prompt templates.
 - `/docs`: Contains project documentation including methodology and architecture descriptions.
 
@@ -42,7 +45,7 @@ This is an exploratory analysis intended to surface patterns in specific models 
 - Aviod using tick marks, check marks, or similar symbols in comments, documentation, error messages,
   or any user-facing text.
 - Use double quotes for strings.
-- Use modern type hints (Python 3.14+)
+- Use modern type hints (Python 3.14+). Avoid `Any` unless necessary.
 
 ## LLM Behaviour Instructions
 
