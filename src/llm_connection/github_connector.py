@@ -65,8 +65,9 @@ class GitHubConnector:
             ],
             "model": model_id,
         }
-        # Adding model-specific settings
-        payload.update(self.model_settings.additional_settings)
+        # Adding model-specific settings if they exist
+        if self.model_settings.additional_settings:
+            payload.update(self.model_settings.additional_settings)
         
         logger.debug(f"Additional settings: {self.model_settings.additional_settings}")
 
@@ -74,9 +75,9 @@ class GitHubConnector:
             with httpx.Client(timeout=self.timeout_sec) as client:
                 logger.debug(f"Making POST request to {self.provider_settings.url}")
                 response = client.post(
+                    url=str(self.provider_settings.url),  # Convert HttpUrl to string
                     headers=self.headers,
                     json=payload,
-                    url=self.provider_settings.url,
                 )
                 response.raise_for_status()
                 logger.debug(f"Response received with status code: {response.status_code}")

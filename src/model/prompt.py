@@ -2,7 +2,7 @@
 Pydantic models for structured prompt templates.
 """
 
-from pydantic import BaseModel, Field, ConfigDict, model_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator, field_validator
 from typing import Any
 import string
 

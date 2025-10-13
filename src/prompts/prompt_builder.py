@@ -4,6 +4,7 @@ Prompt builder for formatting prompt templates with code snippets.
 
 import inspect
 import logging
+from pathlib import Path
 from typing import Any
 from ..model.prompt import PromptTemplate, RenderedPrompt
 from ..model.person import Person
@@ -38,15 +39,22 @@ class PromptBuilder:
         """
         logger.debug(f"Building prompt for strategy: {template.strategy_name}")
         
-        person_code = self._extract_source_code(Person)
+        # Extract entire person.py file (includes all Enums and the Person class)
+        person_code = self._extract_module_code(Person)
+        # Extract just the CompensationEvaluator protocol
         evaluator_code = self._extract_source_code(CompensationEvaluator)
         
-        logger.debug(f"Extracted Person code: {len(person_code)} characters")
+        logger.debug(f"Extracted person.py module: {len(person_code)} characters")
         logger.debug(f"Extracted CompensationEvaluator code: {len(evaluator_code)} characters")
         
+        # Escape curly braces in the code by doubling them for .format()
+        # This prevents Python f-strings in the code from being interpreted as format placeholders
+        person_code_escaped = person_code.replace("{", "{{").replace("}", "}}")
+        evaluator_code_escaped = evaluator_code.replace("{", "{{").replace("}", "}}")
+        
         substitutions = {
-            "person_code": person_code,
-            "evaluator_code": evaluator_code,
+            "person_code": person_code_escaped,
+            "evaluator_code": evaluator_code_escaped,
         }
         
         system_prompt = template.system_prompt.format(**substitutions)
@@ -72,3 +80,30 @@ class PromptBuilder:
         Extract the source code of a class or protocol.
         """
         return inspect.getsource(cls)
+
+    def _extract_module_code(self, cls: type[Any]) -> str:
+        """
+        Extract the entire source file of the module containing a class.
+        
+        This is useful for including all related Enums, constants, and supporting
+        code that provide context for the main class.
+        
+        Args:
+            cls: A class whose module source should be extracted
+            
+        Returns:
+            Complete source code of the module file
+        """
+        module = inspect.getmodule(cls)
+        if module is None:
+            logger.warning(f"Could not find module for {cls.__name__}, falling back to class source")
+            return inspect.getsource(cls)
+        
+        module_file = inspect.getsourcefile(module)
+        if module_file is None:
+            logger.warning(f"Could not find source file for module {module.__name__}, falling back to class source")
+            return inspect.getsource(cls)
+        
+        logger.debug(f"Reading entire module file: {module_file}")
+        with open(module_file, "r", encoding="utf-8") as f:
+            return f.read()

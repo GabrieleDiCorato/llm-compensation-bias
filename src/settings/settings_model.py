@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, SecretStr, URL
+from pydantic import BaseModel, Field, SecretStr, field_validator
+from pydantic.networks import HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import logging
 
@@ -32,13 +33,19 @@ class ModelSettings(BaseModel):
     provider: str = Field(..., description="LLM provider name (e.g., 'openai', 'anthropic', 'github')")
    
     # Optional model-specific settings (temperature, max tokens, etc.)
-    additional_settings: dict = Field(default_factory=dict, description="Additional provider-specific settings")
+    additional_settings: dict | None = Field(default_factory=dict, description="Additional provider-specific settings")
+
+    @field_validator("additional_settings", mode="before")
+    @classmethod
+    def convert_none_to_dict(cls, v):
+        """Convert None to empty dict for additional_settings."""
+        return {} if v is None else v
 
 class ProviderSettings(BaseModel):
     """Configuration for an LLM provider."""
     provider: str = Field(..., description="Provider name (e.g., 'openai', 'anthropic', 'github')")
     api_key_name: str = Field(..., description="API key name to be loaded from the environment or secrets")
-    url: URL = Field(..., description="URL for the LLM API")
+    url: HttpUrl = Field(..., description="URL for the LLM API")
 
 
 class LlmSettings(BaseSettings):

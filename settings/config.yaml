@@ -5,7 +5,7 @@ timeout_seconds: 60
 providers:
   - provider: "github"
     api_key_name: "GITHUB_TOKEN"
-    url: "https://models.github.ai/orgs/ORG/inference/chat/completions"
+    url: "https://models.github.ai/inference/chat/completions"
 
 # Available Models Configuration
 models_settings:
@@ -22,7 +22,7 @@ models_settings:
 # Enabled Models (subset of models_settings)
 enabled_models:
   - "openai/gpt-4.1"
-  - "anthropic/claude-4"
+  #- "anthropic/claude-4"
 
 # Prompt Configuration
 prompt_directory: "settings/prompts"

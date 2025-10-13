@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project investigates how large language models handle sensitive demographic attributes when tasked with compensation estimation. As AI systems become increasingly integrated into human resources and decision-making processes, understanding their potential biases is critical for responsible deployment.
+This project investigates how large language models handle sensitive demographic attributes when tasked with compensation estimation. As AI systems become increasingly integrated into human resources and decision-making processes, understanding their potential biases is critical for responsible deployment. Moreover, we are looking for an effective way to demonstrate how a user's prompt could influence an LLM's response.
 
 ## Motivation
 
