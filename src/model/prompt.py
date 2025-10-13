@@ -2,8 +2,9 @@
 Pydantic models for structured prompt templates.
 """
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from typing import Any
+import string
 
 
 class PromptTemplate(BaseModel):
@@ -50,3 +51,23 @@ class PromptTemplate(BaseModel):
         frozen=True,  # Immutable after creation
         extra="forbid",  # Reject unknown fields in YAML  
     )
+
+class RenderedPrompt(PromptTemplate):
+    """
+    Prompt with all placeholders filled, ready for LLM consumption.
+    Inherits metadata and structure from PromptTemplate, but validates that no unresolved placeholders remain.
+    """
+
+    @model_validator(mode="after")
+    def check_no_placeholders(self) -> "RenderedPrompt":
+        def _has_placeholders(template: str) -> bool:
+            for _, field_name, _, _ in string.Formatter().parse(template):
+                if field_name is not None:
+                    return True
+            return False
+
+        if _has_placeholders(self.system_prompt):
+            raise ValueError(f"system_prompt contains unresolved placeholders")
+        if _has_placeholders(self.user_prompt):
+            raise ValueError(f"user_prompt contains unresolved placeholders")
+        return self

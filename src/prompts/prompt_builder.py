@@ -4,7 +4,7 @@ Prompt builder for formatting prompt templates with code snippets.
 
 import inspect
 from typing import Any
-from ..model.prompt import PromptTemplate
+from ..model.prompt import PromptTemplate, RenderedPrompt
 from ..model.person import Person
 from ..compensation_api.evaluator import CompensationEvaluator
 
@@ -17,7 +17,7 @@ class PromptBuilder:
     substitutes them into prompt templates to create final prompts for LLM connectors.
     """
 
-    def build_prompt(self, template: PromptTemplate) -> tuple[str, str]:
+    def build_prompt(self, template: PromptTemplate) -> RenderedPrompt:
         """
         Build a complete prompt from a template by substituting code placeholders.
         
@@ -25,13 +25,13 @@ class PromptBuilder:
             template: The prompt template with placeholders
             
         Returns:
-            Tuple of (system_prompt, user_prompt) with placeholders replaced
+            RenderedPrompt: The prompt with all placeholders filled
             
         Example:
             >>> loader = PromptLoader()
             >>> template = loader.load_prompt("neutral")
             >>> builder = PromptBuilder()
-            >>> system, user = builder.build_prompt(template)
+            >>> rendered = builder.build_prompt(template)
         """
         person_code = self._extract_source_code(Person)
         evaluator_code = self._extract_source_code(CompensationEvaluator)
@@ -44,19 +44,18 @@ class PromptBuilder:
         system_prompt = template.system_prompt.format(**substitutions)
         user_prompt = template.user_prompt.format(**substitutions)
         
-        return (system_prompt, user_prompt)
+        # This also validates that no placeholders remain
+        return RenderedPrompt(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            strategy_name=template.strategy_name,
+            description=template.description,
+            version=template.version,
+            provider_settings=template.provider_settings,
+        )
 
     def _extract_source_code(self, cls: type[Any]) -> str:
         """
         Extract the source code of a class or protocol.
-        
-        Args:
-            cls: The class or protocol to extract source from
-            
-        Returns:
-            String containing the complete source code
-            
-        Raises:
-            OSError: If source code cannot be retrieved
         """
         return inspect.getsource(cls)
