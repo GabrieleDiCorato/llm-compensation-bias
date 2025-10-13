@@ -2,42 +2,181 @@
 
 ## Overview
 
-This project investigates how large language models handle sensitive demographic attributes when tasked with compensation estimation. As AI systems become increasingly integrated into human resources and decision-making processes, understanding their potential biases is critical for responsible deployment. Moreover, we are looking for an effective way to demonstrate how a user's prompt could influence an LLM's response.
+This project investigates how large language models handle sensitive demographic attributes when tasked with implementing compensation evaluation logic. As AI systems become increasingly integrated into human resources and decision-making processes, understanding their potential biases is critical for responsible deployment.
 
-## Motivation
+We try a simple approach to visualize whether LLMs reproduce, amplify, or mitigate existing societal biases when generating code that estimates compensation based on demographic factors such as gender, race, age, education, and other protected characteristics. Moreover, we explore the impact of bias in the user's prompts on the generated code.
 
-Large language models are trained on vast datasets that reflect real-world patterns, including historical inequities and societal biases. When these models are used to generate code, make predictions, or create synthetic data, they may inadvertently reproduce or amplify discriminatory patterns related to gender, race, age, and other protected characteristics.
+## Methodology
 
-This project examines whether and how LLMs encode compensation biases by observing their behavior across two scenarios:
-- Implementing compensation calculation logic based on demographic attributes
-- Generating synthetic employee datasets with compensation values
+The experiment uses a **code generation approach**: LLMs are asked to implement a `CompensationEvaluator` that calculates estimated annual compensation given a `Person` object with demographic attributes.
+
+### Experimental Design
+
+1. **Multiple Models**: Tests various LLMs (GPT-4, Claude, etc.) to compare bias patterns
+2. **Prompt Strategies**: Uses configurable distinct framings to measure prompt sensitivity. By default:
+   - **Neutral**: Requests implementation without guidance on fairness
+   - **Fair**: Explicitly emphasizes fairness and non-discrimination
+   - **Realistic**: Acknowledges real-world biases and market conditions
+3. **Systematic Testing**: Automatically generates code from all model×strategy combinations
+4. **Validation**: All generated code is syntax-checked and saved with metadata for analysis
+
+## Technical Stack
+
+- **Python 3.12+**: Modern type hints, dataclasses, protocols
+- **Pydantic**: Data validation and settings management
+- **httpx**: Async HTTP client for LLM APIs
+- **PyYAML**: Configuration and prompt template management
+- **UV**: Fast Python package manager
+
+### Architecture Highlights
+
+- **Provider-agnostic design**: Easy to add new LLM providers
+- **Centralized logging**: Structured logging with sensitive data filtering
+- **Configuration-driven**: All experiments controlled via YAML files
+- **Validation pipeline**: Syntax checking and metadata tracking
+- **Clean separation**: Prompts, code, and configuration are decoupled
+
+## Running the Experiment
+
+### Prerequisites
+
+1. Install UV package manager
+2. Clone the repository
+3. Create `settings/secrets.env` with your API keys:
+   ```env
+   GITHUB_TOKEN=your_token_here
+   ```
+
+### Quick Start
+
+```powershell
+# Install dependencies
+uv sync
+
+# Configure models and strategies in settings/config.yaml
+# Edit enabled_models and prompt_strategies
+
+# Run the experiment
+uv run python -m src.main
+```
+
+### Configuration
+
+All experiment parameters are in `settings/config.yaml`:
+
+```yaml
+# Enable/disable models
+enabled_models:
+  - "openai/gpt-4.1"
+  - "anthropic/claude-4"
+
+# Enable/disable prompt strategies
+prompt_strategies:
+  - "neutral"
+  - "fair"
+  - "realistic"
+
+# Output directory
+output_dir: "src/auto_generated"
+```
+
+## Output Structure
+
+Each experiment generates:
+
+1. **Implementation file** (`.py`): Generated compensation evaluator code
+2. **Metadata file** (`.json`): Complete generation details
+
+```
+src/auto_generated/
+├── implementations/
+│   └── openai_gpt-4_1_neutral_v1_0_20251013_143022.py
+└── metadata/
+    └── openai_gpt-4_1_neutral_v1_0_20251013_143022.json
+```
+
+Metadata includes:
+- Model and provider information
+- Prompt strategy used
+- Token usage statistics
+- Validation results
+- Complete prompts for reproducibility
 
 ## Research Questions
 
-- Do different LLMs exhibit systematic biases when estimating compensation based on demographic factors?
-- How does the framing of requests (neutral, realistic, fair) influence the biases expressed by models?
-- Are biases more apparent when models generate code versus when they generate data directly?
-- Do models show consistency between their explicit reasoning and their numeric outputs?
-- Which demographic factors are most strongly associated with compensation differences across models?
+- Do different LLMs exhibit systematic biases when implementing compensation logic?
+- How does prompt framing (neutral vs. fair vs. realistic) influence bias expression?
+- Which demographic factors receive the highest weight in compensation calculations?
+- Are there consistent patterns across models, or model-specific biases?
+- How do models balance competing fairness criteria when explicitly prompted?
+
+## Analysis (Future Work)
+
+Planned analysis pipeline:
+1. Execute generated implementations on diverse `Person` instances
+2. Statistical analysis of compensation patterns by demographic factors
+3. Comparison across models and prompt strategies
+4. Visualization of bias patterns and correlations
+5. Qualitative analysis of implementation approaches
+6. Comparison with another approach: autogenerated code vs synthetic data
 
 ## Scope and Limitations
 
-This is an exploratory analysis intended to surface patterns in specific models under controlled conditions. The findings are limited to:
-- The specific LLMs tested
-- The particular prompts and framings used
-- The demographic attributes and ranges defined in the study
+This is an exploratory analysis demonstrating methodology for investigating AI bias. The findings are limited to:
 
-Results should not be generalized to all AI systems or interpreted as definitive measurements of model bias. Rather, this project demonstrates a methodology for investigating potential biases and provides a case study of patterns observed in current models.
+- **Specific models tested**: Results apply only to the LLMs included in experiments
+- **Specific prompts used**: Different framings may yield different results
+- **Code generation approach**: Analysis focuses on generated logic, not direct predictions
+- **Controlled scenarios**: Uses synthetic demographic profiles, not real employee data
+- **Snapshot in time**: Models evolve; findings may not persist across versions
+
+**Important**: This project is a case study and educational tool. Results should not be:
+- Generalized to all AI systems
+- Interpreted as comprehensive bias audits
+- Used for production deployment decisions
+- Treated as recommendations for actual compensation practices
 
 ## Intended Use
 
-This project serves multiple purposes:
-- **Educational**: Demonstrates experimental design for studying AI bias
-- **Technical**: Showcases data generation, statistical analysis, and visualization skills
-- **Critical**: Encourages thoughtful consideration of AI systems in sensitive applications
+### Educational Purposes
+- Demonstrates experimental design for studying AI bias
+- Shows systematic testing methodology
+- Illustrates bias measurement challenges
+- Provides concrete examples of bias patterns
 
-The methodology and findings may inform discussions about responsible AI development, but should not be treated as comprehensive bias audits or used to make claims about model safety for production deployment.
+### Technical Demonstration
+- Clean Python architecture with modern practices
+- Provider-agnostic LLM integration
+- Configuration-driven experimentation
+- Automated validation and metadata tracking
+- Structured logging and error handling
+
+### Research Applications
+- Template for similar bias investigations
+- Baseline for comparing models
+- Framework for testing bias mitigation strategies
+- Data generation for further analysis
+
+## Contributing
+
+This project welcomes contributions that:
+- Add support for new LLM providers
+- Improve prompt strategies
+- Enhance analysis capabilities
+- Fix bugs or improve documentation
+
+## Ethical Considerations
+
+This research examines AI systems that process demographic information. Key principles:
+
+1. **No real data**: All person profiles are synthetic
+2. **Research only**: Not for production use in HR systems
+3. **Transparency**: Complete prompts and outputs are preserved
+4. **Critique, not deployment**: Focus is on understanding and improving AI systems
+5. **Responsible disclosure**: Findings may inform broader discussions about AI fairness
 
 ## Disclaimer
 
 This project generates and analyzes hypothetical compensation data based on demographic attributes solely for research purposes. The analysis examines AI model behavior and does not reflect the views or practices of any organization. No real employee data is used, and no recommendations for actual compensation decisions are provided.
+
+The generated code is created by AI models and may contain biases, errors, or unintended behaviors. It should not be used in production systems without extensive additional testing, validation, and ethical review.
