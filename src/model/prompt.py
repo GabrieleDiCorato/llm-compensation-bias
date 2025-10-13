@@ -29,7 +29,7 @@ class PromptTemplate(BaseModel):
     # Optional metadata
     strategy_name: str | None = Field(
         None,
-        description="Name of this prompt strategy (e.g. neutral, fair, realistic)",
+        description="Internal name of the prompt strategy (e.g., 'neutral', 'fair', 'realistic')",
     )
     description: str | None = Field(
         None,

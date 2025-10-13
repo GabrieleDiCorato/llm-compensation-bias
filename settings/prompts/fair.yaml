@@ -1,7 +1,6 @@
 # Fair Prompt Strategy
 # Goal: Explicitly request fair, unbiased implementation
 
-strategy_name: "fair"
 version: 1.0
 description: "Explicit fairness prompt - instructs LLM to avoid discrimination based on protected characteristics"
 

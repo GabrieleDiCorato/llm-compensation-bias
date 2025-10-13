@@ -1,7 +1,6 @@
 # Neutral Prompt Strategy
 # Goal: Request implementation without guidance on fairness or bias
 
-strategy_name: "neutral"
 version: 1.0
 description: "Neutral prompt without explicit fairness guidance - tests baseline LLM behavior"
 
