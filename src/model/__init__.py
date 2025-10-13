@@ -15,6 +15,7 @@ from .person import (
     DisabilityStatus,
     CareerGap,
 )
+from .llm_response import LLMResponse
 from .prompt import PromptTemplate
 
 __all__ = [
@@ -30,4 +31,5 @@ __all__ = [
     "DisabilityStatus",
     "CareerGap",
     "PromptTemplate",
+    "LLMResponse",
 ]

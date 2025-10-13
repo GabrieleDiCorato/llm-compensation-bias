@@ -4,9 +4,9 @@ GitHub Models API connector implementation.
 import httpx
 import logging
 
-from src.settings.settings_model import SecretSettings, LlmSettings, ModelSettings, ProviderSettings
+from src.settings.settings_model import SecretSettings, ModelSettings, ProviderSettings
 from src.model.prompt import RenderedPrompt
-from .llm_connector import LLMConnector, LLMResponse
+from src.model.llm_response import LLMResponse
 
 logger = logging.getLogger(__name__)
 
@@ -44,10 +44,12 @@ class GitHubConnector:
         model_id: str
     ) -> LLMResponse:
         """
-        Send prompt to GitHub Models API and return response.
+        Send prompt to GitHub Models API and return simplified response.
 
         Args:
             prompt: The rendered prompt to send to the LLM
+            provider_id: Provider identifier (for logging)
+            model_id: Model identifier
 
         Returns:
             LLMResponse with content and metadata
@@ -80,20 +82,12 @@ class GitHubConnector:
                 logger.debug(f"Response received with status code: {response.status_code}")
 
             data = response.json()
-            choice = data["choices"][0]
+            
+            logger.debug(f"Raw response keys: {list(data.keys())}")
+            logger.debug(f"Number of choices: {len(data.get('choices', []))}")
 
-            llm_response = LLMResponse(
-                content=choice["message"]["content"],
-                model=data["model"],
-                tokens_used=data.get("usage", {}).get("total_tokens"),
-                finish_reason=choice.get("finish_reason"),
-            )
-            
-            logger.info(f"Query completed successfully for model: {model_id}")
-            logger.info(f"Tokens used: {llm_response.tokens_used}, Finish reason: {llm_response.finish_reason}")
-            logger.debug(f"Response content length: {len(llm_response.content)} characters")
-            
-            return llm_response
+            # Parse GitHub-specific response into our generic format
+            return self._parse_github_response(data, model_id)
             
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error occurred: {e.response.status_code} - {e.response.text}")
@@ -104,6 +98,69 @@ class GitHubConnector:
         except Exception as e:
             logger.error(f"Unexpected error during query: {type(e).__name__}: {str(e)}")
             raise
+
+    def _parse_github_response(self, data: dict, model_id: str) -> LLMResponse:
+        """
+        Parse GitHub API response into our generic LLMResponse format.
+        
+        This method encapsulates all GitHub-specific parsing logic,
+        keeping the response handler decoupled from provider details.
+        
+        Args:
+            data: Raw response from GitHub API
+            model_id: Model identifier
+            
+        Returns:
+            Provider-agnostic LLMResponse
+            
+        Raises:
+            ValueError: If response structure is invalid
+        """
+        try:
+            # Extract content from GitHub's structure
+            content = data["choices"][0]["message"]["content"]
+            finish_reason = data["choices"][0].get("finish_reason")
+            
+            # Extract token usage if available
+            usage = data.get("usage", {})
+            total_tokens = usage.get("total_tokens")
+            
+            # Build metadata dict with provider-specific details
+            metadata = {
+                "prompt_tokens": usage.get("prompt_tokens"),
+                "completion_tokens": usage.get("completion_tokens"),
+                "response_id": data.get("id"),
+                "created": data.get("created"),
+                "object_type": data.get("object"),
+                "role": data["choices"][0]["message"].get("role"),
+                "choice_index": data["choices"][0].get("index", 0),
+            }
+            
+            logger.info(f"Query completed successfully for model: {model_id}")
+            logger.info(f"Tokens used: {total_tokens}, Finish reason: {finish_reason}")
+            logger.debug(f"Response content length: {len(content)} characters")
+            
+            if usage:
+                logger.debug(
+                    f"Token breakdown - Prompt: {metadata['prompt_tokens']}, "
+                    f"Completion: {metadata['completion_tokens']}, "
+                    f"Total: {total_tokens}"
+                )
+            
+            return LLMResponse(
+                content=content,
+                model_id=model_id,
+                tokens_used=total_tokens,
+                finish_reason=finish_reason,
+                metadata=metadata,
+                raw_response=data  # Store complete response for debugging
+            )
+            
+        except (KeyError, IndexError) as e:
+            logger.error(f"Failed to parse GitHub response: {e}")
+            logger.debug(f"Response structure: {list(data.keys())}")
+            raise ValueError(f"Invalid GitHub API response structure: {e}") from e
+
 
     @property
     def model_name(self) -> str:
