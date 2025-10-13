@@ -38,7 +38,9 @@ This is an exploratory analysis intended to surface patterns in specific models 
 
 ## Coding Standards
 
-- Aviod using emojis in comments.
+- Aviod using emojis. 
+- Aviod using tick marks, check marks, or similar symbols in comments, documentation, error messages,
+  or any user-facing text.
 - Use double quotes for strings.
 - Use modern type hints (Python 3.14+)
 

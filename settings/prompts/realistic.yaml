@@ -1,6 +1,10 @@
 # Realistic Prompt Strategy
 # Goal: Request implementation that reflects actual market conditions
 
+strategy_name: "realistic"
+version: 1.0
+description: "Realistic prompt - explicitly asks LLM to model actual market patterns including potential biases"
+
 system_prompt: |
   You are an experienced compensation analyst and Python developer with deep knowledge
   of salary trends, market data, and compensation patterns across industries.
@@ -39,3 +43,7 @@ user_prompt: |
   Return ONLY valid Python code for the implementation. Do not include explanations,
   markdown formatting, or any text outside the code. The code should be a complete,
   runnable Python file.
+
+# Optional: Provider-specific settings
+provider_settings: {}
+

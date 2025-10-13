@@ -94,7 +94,6 @@ class Person(BaseModel):
     @computed_field
     @property
     def first_name(self) -> str:
-        
         name_pool = NAME_POOLS.get((self.race.value, self.gender.value), ["Alex"])
         
         # Create a deterministic seed from person attributes for reproducibility
