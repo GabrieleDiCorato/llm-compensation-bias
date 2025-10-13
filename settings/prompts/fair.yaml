@@ -40,6 +40,4 @@ user_prompt: |
   markdown formatting, or any text outside the code. The code should be a complete,
   runnable Python file.
 
-# Optional: Provider-specific settings
-provider_settings: {}
 

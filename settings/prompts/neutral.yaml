@@ -37,7 +37,3 @@ user_prompt: |
   Return ONLY valid Python code for the implementation. Do not include explanations,
   markdown formatting, or any text outside the code. The code should be a complete,
   runnable Python file.
-
-# Optional: Provider-specific settings
-provider_settings: {}
-

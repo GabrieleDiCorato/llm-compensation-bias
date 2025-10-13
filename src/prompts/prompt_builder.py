@@ -50,8 +50,7 @@ class PromptBuilder:
             user_prompt=user_prompt,
             strategy_name=template.strategy_name,
             description=template.description,
-            version=template.version,
-            provider_settings=template.provider_settings,
+            version=template.version
         )
 
     def _extract_source_code(self, cls: type[Any]) -> str:

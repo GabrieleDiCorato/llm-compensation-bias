@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field, SecretStr, URL
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,9 +19,41 @@ class SecretSettings(BaseSettings):
         env_nested_delimiter="__",
     )
 
+class ModelSettings(BaseModel):
+    """Configuration for a specific LLM model."""
+    model_id: str = Field(..., description="Model unique identifier (e.g., 'gpt-4o', 'claude-2')")
+    provider: str = Field(..., description="LLM provider name (e.g., 'openai', 'anthropic', 'github')")
+   
+    # Optional model-specific settings (temperature, max tokens, etc.)
+    additional_settings: dict = Field(default_factory=dict, description="Additional provider-specific settings")
+
+class ProviderSettings(BaseModel):
+    """Configuration for an LLM provider."""
+    provider: str = Field(..., description="Provider name (e.g., 'openai', 'anthropic', 'github')")
+    api_key_name: str = Field(..., description="API key name to be loaded from the environment or secrets")
+    url: URL = Field(..., description="URL for the LLM API")
+
 
 class LlmSettings(BaseSettings):
     """Experiment configuration from YAML."""
+
+    # HTTP SETTINGS
+    timeout_seconds: int = Field(60, description="HTTP request timeout in seconds")
+    
+    # MODELS SETTINGS
+    # Configure LLM providers
+    providers: list[ProviderSettings] = Field(default_factory=list, description="List of LLM provider configurations", min_length=1)
+    # Configure all available models
+    models_settings: list[ModelSettings] = Field(default_factory=list, description="List of LLM model configurations", min_length=1)
+    # Must be a subset of models_settings
+    enabled_models: list[str] = Field(default_factory=list, description="List of enabled model IDs")
+    
+    # PROMPTS
+    prompt_directory: str = Field("settings/prompts", description="Directory containing prompt YAML files")
+    prompt_strategies: list[str] = Field(default_factory=list)
+    
+    # OUTPUT
+    output_dir: str = Field("src/auto_generated", description="Directory to save output results")
 
     model_config = SettingsConfigDict(
         frozen=True,
@@ -29,12 +61,6 @@ class LlmSettings(BaseSettings):
         validate_default=True,
         case_sensitive=False,
         use_enum_values=True,
-        yaml_file="settings/experiment_config.yaml",
+        yaml_file="settings/config.yaml",
         nested_model_default_partial_update=True,
     )
-
-    llm_providers: list[dict] = Field(default_factory=list)
-    prompt_directory: str = Field(default="settings/prompts", description="Directory containing prompt YAML files")
-    prompt_strategies: list[str] = Field(default_factory=list)
-    code_context: dict = Field(default_factory=dict)
-    output: dict = Field(default_factory=dict)

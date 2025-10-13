@@ -1,0 +1,35 @@
+# HTTP Settings
+timeout_seconds: 60
+
+# LLM Providers Configuration
+providers:
+  - provider: "github"
+    api_key_name: "GITHUB_TOKEN"
+    url: "https://models.github.ai/orgs/ORG/inference/chat/completions"
+
+# Available Models Configuration
+models_settings:
+  - model_id: "openai/gpt-4.1"
+    provider: "github"
+    additional_settings:
+      # temperature: 0.7
+      # max_tokens: 4096
+      # top_p: 1.0
+  - model_id: "anthropic/claude-4"
+    provider: "github"
+    additional_settings:
+
+# Enabled Models (subset of models_settings)
+enabled_models:
+  - "openai/gpt-4.1"
+  - "anthropic/claude-4"
+
+# Prompt Configuration
+prompt_directory: "settings/prompts"
+prompt_strategies:
+  - "neutral"
+  - "fair"
+  - "realistic"
+
+# Output Settings
+output_dir: "src/auto_generated"

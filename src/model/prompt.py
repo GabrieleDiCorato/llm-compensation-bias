@@ -41,12 +41,6 @@ class PromptTemplate(BaseModel):
         description="Version string for this prompt template",
     )
 
-    # Optional provider-specific settings
-    provider_settings: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Provider-specific configuration (e.g., Claude's thinking_budget, OpenAI's response_format)",
-    )
-
     model_config = ConfigDict(
         frozen=True,  # Immutable after creation
         extra="forbid",  # Reject unknown fields in YAML  
