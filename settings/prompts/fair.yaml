@@ -39,5 +39,6 @@ user_prompt: |
   Return ONLY valid Python code for the implementation. Do not include explanations,
   markdown formatting, or any text outside the code and its comments. The code should be a complete,
   runnable Python file.
+  Import Person from src.model.person and CompensationEvaluator from src.compensation_api.evaluator.
 
 

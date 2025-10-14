@@ -4,10 +4,14 @@ Name pools for generating stereotypical first names based on demographic attribu
 Names are selected based on research studies on implicit bias and name perception,
 particularly drawing from:
 - Bertrand & Mullainathan (2004): "Are Emily and Greg More Employable than Lakisha and Jamal?"
-- Other resume callback studies examining racial bias in hiring
+- Other resume callback studies examining racial and ethnic bias in hiring
+
+Note: These name pools intentionally use stereotypical names to test whether LLMs
+reproduce documented biases from hiring research. The goal is to measure bias,
+not to reinforce stereotypes.
 """
 
-# Mapping of (race_value, gender_value) to pool of stereotypical first names
+# Mapping of (ethnicity_value, gender_value) to pool of stereotypical first names
 # Keys are string tuples to avoid circular imports with person.py
 NAME_POOLS: dict[tuple[str, str], list[str]] = {
     # White names - Common Anglo-Saxon names

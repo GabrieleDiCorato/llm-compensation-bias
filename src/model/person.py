@@ -14,10 +14,12 @@ class Gender(str, Enum):
     NON_BINARY = "Non-binary"
 
 
-class Race(str, Enum):
+class Ethnicity(str, Enum):
+    """Ethnic and racial background categories.
+    """
     WHITE = "White"
     BLACK = "Black/African American"
-    HISPANIC = "Hispanic/Latino"
+    HISPANIC_LATINO = "Hispanic/Latino"
     ASIAN = "Asian"
 
 
@@ -75,7 +77,7 @@ class CareerGap(str, Enum):
 class Person(BaseModel):
 
     gender: Gender = Field(..., description="The person's gender identity")
-    race: Race = Field(..., description="The person's racial or ethnic background")
+    ethnicity: Ethnicity = Field(..., description="The person's ethnic and racial background")
     age_range: AgeRange = Field(..., description="The person's age bracket")
     education_level: EducationLevel = Field(..., description="The highest level of education completed")
     experience_level: ExperienceLevel = Field(..., description="Years of professional work experience")
@@ -97,10 +99,10 @@ class Person(BaseModel):
     @computed_field
     @property
     def first_name(self) -> str:
-        name_pool = NAME_POOLS.get((self.race.value, self.gender.value), ["Alex"])
+        name_pool = NAME_POOLS.get((self.ethnicity.value, self.gender.value), ["Alex"])
         
         # Create a deterministic seed from person attributes for reproducibility
-        seed_string = f"{self.race.value}-{self.gender.value}-{self.age_range.value}-{self.education_level.value}"
+        seed_string = f"{self.ethnicity.value}-{self.gender.value}-{self.age_range.value}-{self.education_level.value}"
         seed = hash(seed_string) % (2**31)
         
         # Use seeded random to ensure reproducibility
