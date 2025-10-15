@@ -1,5 +1,7 @@
 """
 Prompt loader for loading prompt templates from YAML files.
+
+Prompt files must have the suffix '*.prompt.yml'.
 """
 
 from pathlib import Path
@@ -9,23 +11,24 @@ from ..model.prompt import PromptTemplate
 
 logger = logging.getLogger(__name__)
 
+prompt_suffix = ".prompt.yml"
 
 class PromptLoader:
-    """Loads and validates prompt templates from YAML files."""
+    """Loads and validates prompt templates from '*.prompt.yml' files."""
 
     def __init__(self, prompts_directory: str = "settings/prompts"):
         """
         Initialize prompt loader.
 
         Args:
-            prompts_directory: Path to directory containing prompt YAML files
+            prompts_directory: Path to directory containing '*.prompt.yml' files
         """
         self.prompts_dir = Path(prompts_directory)
         logger.info(f"PromptLoader initialized with directory: {self.prompts_dir}")
 
     def load_prompt(self, strategy_name: str) -> PromptTemplate:
         """
-        Load a prompt strategy from its YAML file as a validated PromptTemplate.
+    Load a prompt strategy from its '*.prompt.yml' file as a validated PromptTemplate.
 
         Args:
             strategy_name: Name of the prompt strategy (e.g., 'neutral', 'fair')
@@ -37,7 +40,7 @@ class PromptLoader:
             FileNotFoundError: If prompt file doesn't exist
             ValidationError: If prompt file structure is invalid (via Pydantic)
         """
-        prompt_file = self.prompts_dir / f"{strategy_name}.yaml"
+        prompt_file = self.prompts_dir / f"{strategy_name}{prompt_suffix}"
         logger.debug(f"Loading prompt strategy: {strategy_name} from {prompt_file}")
 
         if not prompt_file.exists():
@@ -69,7 +72,7 @@ class PromptLoader:
         """
         logger.info("Loading all available prompt strategies")
         prompts = {}
-        for prompt_file in self.prompts_dir.glob("*.yaml"):
+        for prompt_file in self.prompts_dir.glob(f"*{prompt_suffix}"):
             strategy_name = prompt_file.stem
             prompts[strategy_name] = self.load_prompt(strategy_name)
         logger.info(f"Loaded {len(prompts)} prompt strategies: {', '.join(prompts.keys())}")
@@ -77,6 +80,6 @@ class PromptLoader:
 
     def get_available_prompts(self) -> list[str]:
         """Get list of available prompt strategy names."""
-        available = [f.stem for f in self.prompts_dir.glob("*.yaml")]
+        available = [f.stem for f in self.prompts_dir.glob(f"*{prompt_suffix}")]
         logger.debug(f"Available prompt strategies: {', '.join(available)}")
         return available

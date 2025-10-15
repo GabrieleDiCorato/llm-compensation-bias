@@ -1,5 +1,5 @@
 # HTTP Settings
-timeout_seconds: 60
+timeout_seconds: 90
 
 # LLM Providers Configuration
 providers:
@@ -15,14 +15,22 @@ models_settings:
       # temperature: 0.7
       # max_tokens: 4096
       # top_p: 1.0
-  - model_id: "anthropic/claude-4"
+  - model_id: "openai/gpt-5-nano"
+    provider: "github"
+    additional_settings:
+  - model_id: "DeepSeek-R1-0528"
+    provider: "github"
+    additional_settings:
+  - model_id: "xai/grok-3"
     provider: "github"
     additional_settings:
 
 # Enabled Models (subset of models_settings)
 enabled_models:
   - "openai/gpt-4.1"
-  #- "anthropic/claude-4"
+  - "openai/gpt-5-nano"
+  - "DeepSeek-R1-0528"
+  - "xai/grok-3"
 
 # Prompt Configuration
 prompt_directory: "settings/prompts"

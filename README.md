@@ -48,8 +48,10 @@ The experiment uses a **code generation approach**: LLMs are asked to implement 
    ```
 
 ### Quick Start
+  # Prompt templates must be named with the suffix '*.prompt.yml' and placed in 'settings/prompts/'.
 
 ```powershell
+  prompt_strategies:  # each must have a corresponding '*.prompt.yml' file in 'settings/prompts/'
 # Install dependencies
 uv sync
 
