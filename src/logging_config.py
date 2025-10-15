@@ -11,20 +11,12 @@ This module provides a standardized logging setup with:
 import logging
 import sys
 from pathlib import Path
-from typing import Any
 
 
 class SensitiveDataFilter(logging.Filter):
     """Filter that sanitizes sensitive data from log messages."""
 
-    SENSITIVE_PATTERNS = [
-        "Bearer ",
-        "token=",
-        "api_key=",
-        "password=",
-        "secret=",
-        "Authorization:",
-    ]
+    SENSITIVE_PATTERNS = ["Bearer ", "token=", "api_key=", "password=", "secret=", "Authorization:"]
 
     def filter(self, record: logging.LogRecord) -> bool:
         """Sanitize sensitive data in log messages."""
@@ -39,31 +31,29 @@ class SensitiveDataFilter(logging.Filter):
         """Replace sensitive data with asterisks while preserving context."""
         msg_lower = msg.lower()
         pattern_lower = pattern.lower()
-        
+
         if pattern_lower in msg_lower:
             # Find the pattern and mask the following value
             idx = msg_lower.find(pattern_lower)
-            before = msg[:idx + len(pattern)]
+            before = msg[: idx + len(pattern)]
             after_start = idx + len(pattern)
-            
+
             # Find the end of the sensitive value (space, comma, newline, or end of string)
-            end_chars = [' ', ',', '\n', '\r', '"', "'"]
+            end_chars = [" ", ",", "\n", "\r", '"', "'"]
             end_idx = len(msg)
             for char in end_chars:
                 pos = msg.find(char, after_start)
                 if pos != -1 and pos < end_idx:
                     end_idx = pos
-            
+
             masked = before + "***REDACTED***" + msg[end_idx:]
             return masked
-        
+
         return msg
 
 
 def setup_logging(
-    log_level: str = "INFO",
-    log_file: str | None = None,
-    enable_console: bool = True,
+    log_level: str = "INFO", log_file: str | None = None, enable_console: bool = True
 ) -> None:
     """
     Configure logging for the entire application.
@@ -83,8 +73,7 @@ def setup_logging(
 
     # Create formatter
     formatter = logging.Formatter(
-        fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
 
     # Console handler

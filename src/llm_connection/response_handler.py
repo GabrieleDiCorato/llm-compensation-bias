@@ -13,7 +13,6 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from src.model.llm_response import LLMResponse
 from src.model.prompt import RenderedPrompt
@@ -23,13 +22,14 @@ logger = logging.getLogger(__name__)
 
 class CodeValidationError(Exception):
     """Raised when generated code fails validation."""
+
     pass
 
 
 class ResponseHandler:
     """
     Handles LLM responses by validating, parsing, and saving generated code.
-    
+
     This handler expects responses to contain pure, runnable Python code.
     It performs strict validation and saves both the code and metadata separately.
     """
@@ -44,9 +44,9 @@ class ResponseHandler:
         self.output_dir = Path(output_dir)
         self.implementations_dir = self.output_dir / "implementations"
         self.metadata_dir = self.output_dir / "metadata"
-        
+
         self._ensure_directories()
-        
+
         logger.info(f"ResponseHandler initialized with output directory: {self.output_dir}")
 
     def _ensure_directories(self) -> None:
@@ -79,7 +79,7 @@ class ResponseHandler:
         model_id: str,
         strategy_name: str,
         prompt_version: str,
-        timestamp: datetime | None = None
+        timestamp: datetime | None = None,
     ) -> str:
         """
         Generate a filename for the implementation.
@@ -100,23 +100,19 @@ class ResponseHandler:
 
         # Sanitize model_id: replace / and . with _
         safe_model = model_id.replace("/", "_").replace(".", "_")
-        
+
         # Format timestamp
         timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
-        
+
         # Replace . in version with underscore
         safe_version = prompt_version.replace(".", "_")
-        
+
         filename = f"{safe_model}_{strategy_name}_v{safe_version}_{timestamp_str}"
-        
+
         logger.debug(f"Generated filename: {filename}")
         return filename
 
-    def save_implementation(
-        self,
-        code: str,
-        filename_base: str
-    ) -> Path:
+    def save_implementation(self, code: str, filename_base: str) -> Path:
         """
         Save the Python implementation to a file.
 
@@ -128,13 +124,13 @@ class ResponseHandler:
             Path to the saved file
         """
         filepath = self.implementations_dir / f"{filename_base}.py"
-        
+
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(code)
             logger.info(f"Saved implementation to: {filepath}")
             return filepath
-        except IOError as e:
+        except OSError as e:
             logger.error(f"Failed to save implementation: {e}")
             raise
 
@@ -146,7 +142,7 @@ class ResponseHandler:
         model_id: str,
         provider_id: str,
         validation_passed: bool,
-        error_message: str | None = None
+        error_message: str | None = None,
     ) -> Path:
         """
         Save metadata about the generation to a JSON file.
@@ -164,7 +160,7 @@ class ResponseHandler:
             Path to the saved metadata file
         """
         filepath = self.metadata_dir / f"{filename_base}.json"
-        
+
         metadata = {
             "generation_info": {
                 "model_id": model_id,
@@ -181,31 +177,21 @@ class ResponseHandler:
                 "finish_reason": response.finish_reason,
                 "metadata": response.metadata,  # Provider-specific details
             },
-            "prompts": {
-                "system_prompt": prompt.system_prompt,
-                "user_prompt": prompt.user_prompt,
-            },
-            "validation": {
-                "passed": validation_passed,
-                "error_message": error_message,
-            },
+            "prompts": {"system_prompt": prompt.system_prompt, "user_prompt": prompt.user_prompt},
+            "validation": {"passed": validation_passed, "error_message": error_message},
         }
-        
+
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2, ensure_ascii=False)
             logger.info(f"Saved metadata to: {filepath}")
             return filepath
-        except IOError as e:
+        except OSError as e:
             logger.error(f"Failed to save metadata: {e}")
             raise
 
     def process_response(
-        self,
-        response: LLMResponse,
-        prompt: RenderedPrompt,
-        model_id: str,
-        provider_id: str
+        self, response: LLMResponse, prompt: RenderedPrompt, model_id: str, provider_id: str
     ) -> tuple[Path, Path]:
         """
         Process an LLM response: validate, save code, and save metadata.
@@ -224,32 +210,30 @@ class ResponseHandler:
         Raises:
             CodeValidationError: If code validation fails
         """
-        logger.info(
-            f"Processing response from {model_id} using strategy '{prompt.strategy_name}'"
-        )
-        
+        logger.info(f"Processing response from {model_id} using strategy '{prompt.strategy_name}'")
+
         code = response.content.strip()
-        
+
         # Generate filename
         filename_base = self.generate_filename(
             model_id=model_id,
             strategy_name=prompt.strategy_name or "unknown",
             prompt_version=prompt.version or "0.0",
         )
-        
+
         validation_passed = False
         error_message = None
-        
+
         try:
             # Validate Python syntax
             logger.info("Validating Python syntax")
             self.validate_python_syntax(code)
             validation_passed = True
-            
+
             # Save the implementation
             logger.info("Saving implementation")
             code_path = self.save_implementation(code, filename_base)
-            
+
             # Save metadata
             logger.info("Saving metadata")
             metadata_path = self.save_metadata(
@@ -260,23 +244,23 @@ class ResponseHandler:
                 provider_id=provider_id,
                 validation_passed=validation_passed,
             )
-            
+
             logger.info(f"Successfully processed response: {filename_base}")
             return code_path, metadata_path
-            
+
         except CodeValidationError as e:
             error_message = str(e)
             logger.error(f"Code validation failed: {error_message}")
-            
+
             # Save the raw response even though validation failed
             logger.info("Saving invalid code and metadata for analysis")
-            
+
             # Save with .txt extension to indicate invalid code
             invalid_path = self.implementations_dir / f"{filename_base}_INVALID.txt"
             with open(invalid_path, "w", encoding="utf-8") as f:
                 f.write(code)
             logger.info(f"Saved invalid code to: {invalid_path}")
-            
+
             # Save metadata with error information
             metadata_path = self.save_metadata(
                 response=response,
@@ -287,6 +271,6 @@ class ResponseHandler:
                 validation_passed=False,
                 error_message=error_message,
             )
-            
+
             logger.error("Validation failed. Saved raw response and metadata.")
             raise

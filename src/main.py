@@ -20,12 +20,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from src.logging_config import setup_logging, get_logger
-from src.settings.settings_model import LlmSettings, SecretSettings
 from src.llm_connection.connector_factory import create_connector
-from src.llm_connection.response_handler import ResponseHandler, CodeValidationError
-from src.prompts.prompt_loader import PromptLoader
+from src.llm_connection.response_handler import CodeValidationError, ResponseHandler
+from src.logging_config import get_logger, setup_logging
 from src.prompts.prompt_builder import PromptBuilder
+from src.prompts.prompt_loader import PromptLoader
+from src.settings.settings_model import LlmSettings, SecretSettings
 
 logger = get_logger(__name__)
 
@@ -66,11 +66,7 @@ class ExperimentRunner:
             "strategies_tested": set(),
         }
 
-    def run_single_experiment(
-        self,
-        model_id: str,
-        strategy_name: str,
-    ) -> bool:
+    def run_single_experiment(self, model_id: str, strategy_name: str) -> bool:
         """
         Run a single experiment: query model with strategy and save result.
 
@@ -91,16 +87,15 @@ class ExperimentRunner:
 
             # Create connector
             logger.info(f"Creating connector for model: {model_id}")
-            
+
             # Extract provider from model settings
             model_cfg = next(
-                (m for m in self.settings.models_settings if m.model_id == model_id),
-                None
+                (m for m in self.settings.models_settings if m.model_id == model_id), None
             )
             if not model_cfg:
                 logger.error(f"Model {model_id} not found in settings")
                 return False
-            
+
             provider_id = model_cfg.provider
             connector = create_connector(model_id, self.settings, self.secrets)
 
@@ -116,10 +111,7 @@ class ExperimentRunner:
             # Process and save response
             logger.info("Processing and saving response")
             code_path, metadata_path = self.response_handler.process_response(
-                response=response,
-                prompt=prompt,
-                model_id=model_id,
-                provider_id=provider_id,
+                response=response, prompt=prompt, model_id=model_id, provider_id=provider_id
             )
 
             logger.info(f"Experiment successful: {code_path.name}")
@@ -167,9 +159,7 @@ class ExperimentRunner:
         return results
 
     def run_all(
-        self,
-        models: list[str] | None = None,
-        strategies: list[str] | None = None,
+        self, models: list[str] | None = None, strategies: list[str] | None = None
     ) -> dict[str, dict[str, bool]]:
         """
         Run experiments for all specified models and strategies.
@@ -211,9 +201,7 @@ class ExperimentRunner:
         logger.info(f"  Strategies tested: {len(self.stats['strategies_tested'])}")
 
         if self.stats["total_experiments"] > 0:
-            success_rate = (
-                self.stats["successful"] / self.stats["total_experiments"] * 100
-            )
+            success_rate = self.stats["successful"] / self.stats["total_experiments"] * 100
             logger.info(f"  Success rate: {success_rate:.1f}%")
         logger.info("=" * 60)
 
@@ -277,7 +265,9 @@ def main() -> int:
         logger.info("Experiment Configuration:")
         logger.info(f"  Models: {', '.join(settings.enabled_models)}")
         logger.info(f"  Strategies: {', '.join(settings.prompt_strategies)}")
-        logger.info(f"  Total experiments: {len(settings.enabled_models) * len(settings.prompt_strategies)}")
+        logger.info(
+            f"  Total experiments: {len(settings.enabled_models) * len(settings.prompt_strategies)}"
+        )
         logger.info(f"  Output directory: {settings.output_dir}")
         logger.info("-" * 60)
 
@@ -299,7 +289,7 @@ def main() -> int:
         # Run experiments
         logger.info("Starting experiments")
         logger.info("=" * 60)
-        results = runner.run_all()
+        _ = runner.run_all()
         logger.info("=" * 60)
 
         # Print summary

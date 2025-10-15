@@ -1,7 +1,8 @@
-from enum import Enum
-from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
-import random
 import logging
+import random
+from enum import Enum
+
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 from .name_pools import NAME_POOLS
 
@@ -15,8 +16,8 @@ class Gender(str, Enum):
 
 
 class Ethnicity(str, Enum):
-    """Ethnic and racial background categories.
-    """
+    """Ethnic and racial background categories."""
+
     WHITE = "White"
     BLACK = "Black/African American"
     HISPANIC_LATINO = "Hispanic/Latino"
@@ -75,17 +76,26 @@ class CareerGap(str, Enum):
 
 
 class Person(BaseModel):
-
     gender: Gender = Field(..., description="The person's gender identity")
     ethnicity: Ethnicity = Field(..., description="The person's ethnic and racial background")
     age_range: AgeRange = Field(..., description="The person's age bracket")
-    education_level: EducationLevel = Field(..., description="The highest level of education completed")
-    experience_level: ExperienceLevel = Field(..., description="Years of professional work experience")
-    industry_sector: IndustrySector = Field(..., description="The industry sector in which the person works")
+    education_level: EducationLevel = Field(
+        ..., description="The highest level of education completed"
+    )
+    experience_level: ExperienceLevel = Field(
+        ..., description="Years of professional work experience"
+    )
+    industry_sector: IndustrySector = Field(
+        ..., description="The industry sector in which the person works"
+    )
     employment_type: EmploymentType = Field(..., description="The type of employment arrangement")
     parental_status: ParentalStatus = Field(..., description="Whether the person has children")
-    disability_status: DisabilityStatus = Field(..., description="Whether the person has a disability")
-    career_gap: CareerGap = Field(..., description="Whether the person has had gaps in employment history")
+    disability_status: DisabilityStatus = Field(
+        ..., description="Whether the person has a disability"
+    )
+    career_gap: CareerGap = Field(
+        ..., description="Whether the person has had gaps in employment history"
+    )
 
     model_config = ConfigDict(
         frozen=True,
@@ -93,18 +103,18 @@ class Person(BaseModel):
         validate_assignment=True,
         use_enum_values=False,
         arbitrary_types_allowed=False,
-        extra="forbid"
+        extra="forbid",
     )
 
     @computed_field
     @property
     def first_name(self) -> str:
         name_pool = NAME_POOLS.get((self.ethnicity.value, self.gender.value), ["Alex"])
-        
+
         # Create a deterministic seed from person attributes for reproducibility
         seed_string = f"{self.ethnicity.value}-{self.gender.value}-{self.age_range.value}-{self.education_level.value}"
         seed = hash(seed_string) % (2**31)
-        
+
         # Use seeded random to ensure reproducibility
         rng = random.Random(seed)
         return rng.choice(name_pool)
@@ -115,7 +125,11 @@ class Person(BaseModel):
         age_experience_rules = {
             AgeRange.AGE_18_24: [ExperienceLevel.JUNIOR],
             AgeRange.AGE_25_34: [ExperienceLevel.JUNIOR, ExperienceLevel.MID_CAREER],
-            AgeRange.AGE_35_44: [ExperienceLevel.JUNIOR, ExperienceLevel.MID_CAREER, ExperienceLevel.SENIOR],
+            AgeRange.AGE_35_44: [
+                ExperienceLevel.JUNIOR,
+                ExperienceLevel.MID_CAREER,
+                ExperienceLevel.SENIOR,
+            ],
             AgeRange.AGE_45_54: [ExperienceLevel.MID_CAREER, ExperienceLevel.SENIOR],
             AgeRange.AGE_55_64: [ExperienceLevel.SENIOR],
             AgeRange.AGE_65_PLUS: [ExperienceLevel.SENIOR],

@@ -1,12 +1,14 @@
 """
 GitHub Models API connector implementation.
 """
-import httpx
+
 import logging
 
-from src.settings.settings_model import SecretSettings, ModelSettings, ProviderSettings
-from src.model.prompt import RenderedPrompt
+import httpx
+
 from src.model.llm_response import LLMResponse
+from src.model.prompt import RenderedPrompt
+from src.settings.settings_model import ModelSettings, ProviderSettings, SecretSettings
 
 logger = logging.getLogger(__name__)
 
@@ -32,17 +34,12 @@ class GitHubConnector:
             "X-GitHub-Api-Version": "2022-11-28",
             "Content-Type": "application/json",
         }
-        
+
         logger.info(f"GitHubConnector initialized for model: {model_settings.model_id}")
         logger.debug(f"Provider URL: {provider_settings.url}")
         logger.debug(f"Timeout: {timeout_sec} seconds")
 
-    def query(
-        self,
-        prompt: RenderedPrompt,
-        provider_id: str,
-        model_id: str
-    ) -> LLMResponse:
+    def query(self, prompt: RenderedPrompt, provider_id: str, model_id: str) -> LLMResponse:
         """
         Send prompt to GitHub Models API and return simplified response.
 
@@ -65,7 +62,7 @@ class GitHubConnector:
             ],
             "model": model_id,
         }
-        
+
         # Add generation parameters from provider settings if specified
         if self.provider_settings.max_tokens is not None:
             payload["max_tokens"] = self.provider_settings.max_tokens
@@ -79,12 +76,17 @@ class GitHubConnector:
             payload["frequency_penalty"] = self.provider_settings.frequency_penalty
         if self.provider_settings.stop is not None:
             payload["stop"] = self.provider_settings.stop
-        
+
         # Adding backward-compatible additional settings or model-specific overrides, if they exist
         if self.model_settings.additional_settings:
             payload.update(self.model_settings.additional_settings)
-        
-        logger.debug(f"Generation parameters: max_tokens={self.provider_settings.max_tokens}, temperature={self.provider_settings.temperature}, top_p={self.provider_settings.top_p}, presence_penalty={self.provider_settings.presence_penalty}, frequency_penalty={self.provider_settings.frequency_penalty}, stop={self.provider_settings.stop}")
+
+        logger.debug(
+            f"Generation parameters: max_tokens={self.provider_settings.max_tokens}, "
+            f"temperature={self.provider_settings.temperature}, top_p={self.provider_settings.top_p}, "
+            f"presence_penalty={self.provider_settings.presence_penalty}, "
+            f"frequency_penalty={self.provider_settings.frequency_penalty}, stop={self.provider_settings.stop}"
+        )
         logger.debug(f"Additional settings: {self.model_settings.additional_settings}")
 
         try:
@@ -99,18 +101,18 @@ class GitHubConnector:
                 logger.debug(f"Response received with status code: {response.status_code}")
 
             data = response.json()
-            
+
             logger.debug(f"Raw response keys: {list(data.keys())}")
             logger.debug(f"Number of choices: {len(data.get('choices', []))}")
 
             # Parse GitHub-specific response into our generic format
             return self._parse_github_response(data, model_id)
-            
+
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error occurred: {e.response.status_code}")
             logger.error(f"Request URL: {e.request.url}")
             logger.error(f"Response body: {e.response.text}")
-            
+
             # Try to parse error details if it's JSON
             try:
                 error_data = e.response.json()
@@ -118,7 +120,7 @@ class GitHubConnector:
                     logger.error(f"Error details: {error_data['error']}")
             except Exception:
                 pass  # Response might not be JSON
-            
+
             raise
         except httpx.TimeoutException:
             logger.error(f"Request timed out after {self.timeout_sec} seconds")
@@ -130,17 +132,17 @@ class GitHubConnector:
     def _parse_github_response(self, data: dict, model_id: str) -> LLMResponse:
         """
         Parse GitHub API response into our generic LLMResponse format.
-        
+
         This method encapsulates all GitHub-specific parsing logic,
         keeping the response handler decoupled from provider details.
-        
+
         Args:
             data: Raw response from GitHub API
             model_id: Model identifier
-            
+
         Returns:
             Provider-agnostic LLMResponse
-            
+
         Raises:
             ValueError: If response structure is invalid
         """
@@ -148,11 +150,11 @@ class GitHubConnector:
             # Extract content from GitHub's structure
             content = data["choices"][0]["message"]["content"]
             finish_reason = data["choices"][0].get("finish_reason")
-            
+
             # Extract token usage if available
             usage = data.get("usage", {})
             total_tokens = usage.get("total_tokens")
-            
+
             # Build metadata dict with provider-specific details
             metadata = {
                 "prompt_tokens": usage.get("prompt_tokens"),
@@ -163,32 +165,31 @@ class GitHubConnector:
                 "role": data["choices"][0]["message"].get("role"),
                 "choice_index": data["choices"][0].get("index", 0),
             }
-            
+
             logger.info(f"Query completed successfully for model: {model_id}")
             logger.info(f"Tokens used: {total_tokens}, Finish reason: {finish_reason}")
             logger.debug(f"Response content length: {len(content)} characters")
-            
+
             if usage:
                 logger.debug(
                     f"Token breakdown - Prompt: {metadata['prompt_tokens']}, "
                     f"Completion: {metadata['completion_tokens']}, "
                     f"Total: {total_tokens}"
                 )
-            
+
             return LLMResponse(
                 content=content,
                 model_id=model_id,
                 tokens_used=total_tokens,
                 finish_reason=finish_reason,
                 metadata=metadata,
-                raw_response=data  # Store complete response for debugging
+                raw_response=data,  # Store complete response for debugging
             )
-            
+
         except (KeyError, IndexError) as e:
             logger.error(f"Failed to parse GitHub response: {e}")
             logger.debug(f"Response structure: {list(data.keys())}")
             raise ValueError(f"Invalid GitHub API response structure: {e}") from e
-
 
     @property
     def model_name(self) -> str:
