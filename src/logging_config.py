@@ -19,10 +19,11 @@ class SensitiveDataFilter(logging.Filter):
 
     SENSITIVE_PATTERNS = [
         "Bearer ",
-        "token",
-        "api_key",
-        "password",
-        "secret",
+        "token=",
+        "api_key=",
+        "password=",
+        "secret=",
+        "Authorization:",
     ]
 
     def filter(self, record: logging.LogRecord) -> bool:
@@ -31,14 +32,31 @@ class SensitiveDataFilter(logging.Filter):
             msg = str(record.msg)
             for pattern in self.SENSITIVE_PATTERNS:
                 if pattern.lower() in msg.lower():
-                    record.msg = self._sanitize_message(msg)
+                    record.msg = self._sanitize_message(msg, pattern)
         return True
 
-    def _sanitize_message(self, msg: str) -> str:
-        """Replace sensitive data with asterisks."""
-        for pattern in self.SENSITIVE_PATTERNS:
-            if pattern.lower() in msg.lower():
-                return msg[:50] + "..." if len(msg) > 50 else msg
+    def _sanitize_message(self, msg: str, pattern: str) -> str:
+        """Replace sensitive data with asterisks while preserving context."""
+        msg_lower = msg.lower()
+        pattern_lower = pattern.lower()
+        
+        if pattern_lower in msg_lower:
+            # Find the pattern and mask the following value
+            idx = msg_lower.find(pattern_lower)
+            before = msg[:idx + len(pattern)]
+            after_start = idx + len(pattern)
+            
+            # Find the end of the sensitive value (space, comma, newline, or end of string)
+            end_chars = [' ', ',', '\n', '\r', '"', "'"]
+            end_idx = len(msg)
+            for char in end_chars:
+                pos = msg.find(char, after_start)
+                if pos != -1 and pos < end_idx:
+                    end_idx = pos
+            
+            masked = before + "***REDACTED***" + msg[end_idx:]
+            return masked
+        
         return msg
 
 

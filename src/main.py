@@ -261,8 +261,9 @@ def main() -> int:
     """
     start_time = datetime.now()
 
-    # Setup logging
-    setup_logging(log_level="DEBUG")
+    # Setup logging with both console and file output
+    log_filename = f"logs/experiment_{start_time.strftime('%Y%m%d_%H%M%S')}.log"
+    setup_logging(log_level="DEBUG", log_file=log_filename)
 
     logger.info("LLM Compensation Bias Experiment")
     logger.info(f"Start time: {start_time.isoformat()}")

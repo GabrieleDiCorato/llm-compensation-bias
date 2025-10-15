@@ -107,7 +107,18 @@ class GitHubConnector:
             return self._parse_github_response(data, model_id)
             
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error occurred: {e.response.status_code} - {e.response.text}")
+            logger.error(f"HTTP error occurred: {e.response.status_code}")
+            logger.error(f"Request URL: {e.request.url}")
+            logger.error(f"Response body: {e.response.text}")
+            
+            # Try to parse error details if it's JSON
+            try:
+                error_data = e.response.json()
+                if "error" in error_data:
+                    logger.error(f"Error details: {error_data['error']}")
+            except Exception:
+                pass  # Response might not be JSON
+            
             raise
         except httpx.TimeoutException:
             logger.error(f"Request timed out after {self.timeout_sec} seconds")
