@@ -13,10 +13,10 @@ Usage:
 Configuration is controlled via:
     - settings/config.yaml (models, strategies, output paths)
     - settings/secrets.env (API keys)
+    - settings/prompts/*.prompt.yml (prompt templates; each strategy must have a corresponding '*.prompt.yml' file)
 """
 
 import sys
-import yaml
 from datetime import datetime
 from pathlib import Path
 
@@ -244,12 +244,8 @@ def load_settings() -> tuple[LlmSettings, SecretSettings]:
         logger.error(f"Secrets file not found: {secrets_path}")
         raise FileNotFoundError(f"Secrets file not found: {secrets_path}")
 
-    # Load YAML configuration
-    with open(config_path, "r", encoding="utf-8") as f:
-        config_data = yaml.safe_load(f)
-
-    # Load settings with data from YAML
-    settings = LlmSettings(**config_data)
+    # Load settings - Pydantic will automatically load from YAML via YamlConfigSettingsSource
+    settings = LlmSettings()
     secrets = SecretSettings(_env_file=secrets_path)
 
     logger.info("Configuration loaded successfully")

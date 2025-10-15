@@ -65,10 +65,26 @@ class GitHubConnector:
             ],
             "model": model_id,
         }
-        # Adding model-specific settings if they exist
+        
+        # Add generation parameters from provider settings if specified
+        if self.provider_settings.max_tokens is not None:
+            payload["max_tokens"] = self.provider_settings.max_tokens
+        if self.provider_settings.temperature is not None:
+            payload["temperature"] = self.provider_settings.temperature
+        if self.provider_settings.top_p is not None:
+            payload["top_p"] = self.provider_settings.top_p
+        if self.provider_settings.presence_penalty is not None:
+            payload["presence_penalty"] = self.provider_settings.presence_penalty
+        if self.provider_settings.frequency_penalty is not None:
+            payload["frequency_penalty"] = self.provider_settings.frequency_penalty
+        if self.provider_settings.stop is not None:
+            payload["stop"] = self.provider_settings.stop
+        
+        # Adding backward-compatible additional settings or model-specific overrides, if they exist
         if self.model_settings.additional_settings:
             payload.update(self.model_settings.additional_settings)
         
+        logger.debug(f"Generation parameters: max_tokens={self.provider_settings.max_tokens}, temperature={self.provider_settings.temperature}, top_p={self.provider_settings.top_p}, presence_penalty={self.provider_settings.presence_penalty}, frequency_penalty={self.provider_settings.frequency_penalty}, stop={self.provider_settings.stop}")
         logger.debug(f"Additional settings: {self.model_settings.additional_settings}")
 
         try:

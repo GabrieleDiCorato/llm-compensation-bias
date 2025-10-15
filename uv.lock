@@ -322,6 +322,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "pydantic-settings-yaml" },
     { name = "pyyaml" },
 ]
 
@@ -333,6 +334,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "pydantic", specifier = ">=2.12.0" },
     { name = "pydantic-settings", specifier = ">=2.11.0" },
+    { name = "pydantic-settings-yaml", specifier = ">=0.2.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
@@ -651,6 +653,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/20/c5/dbbc27b814c71676593d1c3f718e6cd7d4f00652cefa24b75f7aa3efb25e/pydantic_settings-2.11.0.tar.gz", hash = "sha256:d0e87a1c7d33593beb7194adb8470fc426e95ba02af83a0f23474a04c9a08180", size = 188394, upload_time = "2025-09-24T14:19:11.764Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/83/d6/887a1ff844e64aa823fb4905978d882a633cfe295c32eacad582b78a7d8b/pydantic_settings-2.11.0-py3-none-any.whl", hash = "sha256:fe2cea3413b9530d10f3a5875adffb17ada5c1e1bab0b2885546d7310415207c", size = 48608, upload_time = "2025-09-24T14:19:10.015Z" },
+]
+
+[[package]]
+name = "pydantic-settings-yaml"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic-settings" },
+    { name = "pyyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/03/b5/0de91f5e0d23c0301e44029d5f64a32127f89611acc0a11fc55eb2bc90d1/pydantic_settings_yaml-0.2.0.tar.gz", hash = "sha256:ee3c679ecd04ae045de100458387ff92bb54b435807ca8ac0726c141f63b1c8d", size = 7432, upload_time = "2023-07-20T08:36:34.62Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/a2/87a0b61a3078be07ab04ec574ef6c683c764590ed0d2a50d00cbb23aeae7/pydantic_settings_yaml-0.2.0-py2.py3-none-any.whl", hash = "sha256:e5e3a4866d124cc03bff5cca968455ce658f0382a8287c4b14e5fe91a2d6e2ef", size = 6627, upload_time = "2023-07-20T08:36:33.317Z" },
 ]
 
 [[package]]
