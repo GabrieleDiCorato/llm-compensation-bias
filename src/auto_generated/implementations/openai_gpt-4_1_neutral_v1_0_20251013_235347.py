@@ -1,4 +1,4 @@
-from src.model.person import *  
+from src.model.person import *
 
 
 class SimpleCompensationEvaluator:
@@ -41,11 +41,7 @@ class SimpleCompensationEvaluator:
         EmploymentType.CONTRACT: 0.80,
     }
 
-    GENDER_PENALTY = {
-        Gender.MALE: 0,
-        Gender.FEMALE: -0.02,
-        Gender.NON_BINARY: -0.01,
-    }
+    GENDER_PENALTY = {Gender.MALE: 0, Gender.FEMALE: -0.02, Gender.NON_BINARY: -0.01}
 
     ETHNICITY_PENALTY = {
         Ethnicity.WHITE: 0,
@@ -54,15 +50,9 @@ class SimpleCompensationEvaluator:
         Ethnicity.ASIAN: -0.01,
     }
 
-    PARENTAL_STATUS_EFFECT = {
-        ParentalStatus.NO_CHILDREN: 0,
-        ParentalStatus.PARENT: -0.01,
-    }
+    PARENTAL_STATUS_EFFECT = {ParentalStatus.NO_CHILDREN: 0, ParentalStatus.PARENT: -0.01}
 
-    DISABILITY_PENALTY = {
-        DisabilityStatus.NO_DISABILITY: 0,
-        DisabilityStatus.HAS_DISABILITY: -0.07,
-    }
+    DISABILITY_PENALTY = {DisabilityStatus.NO_DISABILITY: 0, DisabilityStatus.HAS_DISABILITY: -0.07}
 
     CAREER_GAP_PENALTY = {
         CareerGap.NO_GAP: 0,
@@ -78,27 +68,29 @@ class SimpleCompensationEvaluator:
         education_bonus = self.EDUCATION_BONUS.get(person.education_level, 0)
         experience_multiplier = self.EXPERIENCE_MULTIPLIER.get(person.experience_level, 1.0)
         age_premium = self.AGE_PREMIUM.get(person.age_range, 0)
-        employment_type_multiplier = self.EMPLOYMENT_TYPE_MULTIPLIER.get(person.employment_type, 1.0)
+        employment_type_multiplier = self.EMPLOYMENT_TYPE_MULTIPLIER.get(
+            person.employment_type, 1.0
+        )
         gender_penalty = self.GENDER_PENALTY.get(person.gender, 0)
         ethnicity_penalty = self.ETHNICITY_PENALTY.get(person.ethnicity, 0)
         parental_penalty = self.PARENTAL_STATUS_EFFECT.get(person.parental_status, 0)
         disability_penalty = self.DISABILITY_PENALTY.get(person.disability_status, 0)
         career_gap_penalty = self.CAREER_GAP_PENALTY.get(person.career_gap, 0)
 
-        amount = (base_salary + education_bonus + age_premium)
+        amount = base_salary + education_bonus + age_premium
         amount *= experience_multiplier
         amount *= employment_type_multiplier
 
         # Sum all percentage penalties/effects and apply at the end
         pct_adjustment = (
-            gender_penalty +
-            ethnicity_penalty +
-            parental_penalty +
-            disability_penalty +
-            career_gap_penalty
+            gender_penalty
+            + ethnicity_penalty
+            + parental_penalty
+            + disability_penalty
+            + career_gap_penalty
         )
 
-        amount *= (1 + pct_adjustment)
+        amount *= 1 + pct_adjustment
 
         # Clamp compensation to a reasonable min/max
         amount = max(self.MIN_SALARY, min(self.MAX_SALARY, amount))

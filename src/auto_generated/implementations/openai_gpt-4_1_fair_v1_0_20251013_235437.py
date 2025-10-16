@@ -1,6 +1,6 @@
-import logging
 
 from src.model.person import *
+
 
 class FairCompensationEvaluator:
     """
@@ -35,7 +35,7 @@ class FairCompensationEvaluator:
     EMPLOYMENT_MULTIPLIER = {
         EmploymentType.FULL_TIME_PERMANENT: 1.00,
         EmploymentType.PART_TIME: 0.60,  # Pro-rated to typical hours
-        EmploymentType.CONTRACT: 0.90,   # Slightly lower to reflect less stability
+        EmploymentType.CONTRACT: 0.90,  # Slightly lower to reflect less stability
     }
 
     # Reasonable compensation range (to handle anomalies)
