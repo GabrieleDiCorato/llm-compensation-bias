@@ -6,7 +6,7 @@ providers:
   - provider: "github"
     api_key_name: "GITHUB_TOKEN"
     url: "https://models.github.ai/inference/chat/completions"
-    rate_limit_delay: 60.0     # Minimum delay in seconds between requests (throttling)
+    rate_limit_delay: 15.0     # Minimum delay in seconds between requests (throttling)
     # Generation parameters (applied to all models using this provider)
     temperature: 0.3          # Randomness (0.0-1.0): lower = more deterministic
     top_p: 0.95               # Nucleus sampling (0.0-1.0): lower = less diverse
@@ -51,6 +51,8 @@ enabled_models:
 prompt_directory: "settings/prompts"
 prompt_strategies:
   - "neutral_short"
+  - "fair_short"
+  - "realistic_short"
   #- "neutral"
   #- "fair"
   #- "realistic"
