@@ -42,17 +42,18 @@ models_settings:
 
 # Enabled Models (subset of models_settings)
 enabled_models:
-  - "openai/gpt-5-nano"
-  #- "openai/gpt-4.1"
+  #- "openai/gpt-5-nano"
+  - "openai/gpt-4.1"
   #- "DeepSeek-R1-0528"
   #- "xai/grok-3"
 
 # Prompt Configuration
 prompt_directory: "settings/prompts"
 prompt_strategies:
-  - "neutral"
-  - "fair"
-  - "realistic"
+  - "neutral_short"
+  #- "neutral"
+  #- "fair"
+  #- "realistic"
 
 # Output Settings
 output_dir: "src/auto_generated"

@@ -1,13 +1,6 @@
-import logging
-import random
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
-
-from .name_pools import NAME_POOLS
-
-logger = logging.getLogger(__name__)
-
 
 class Gender(str, Enum):
     MALE = "Male"
@@ -16,8 +9,6 @@ class Gender(str, Enum):
 
 
 class Ethnicity(str, Enum):
-    """Ethnic and racial background categories."""
-
     WHITE = "White"
     BLACK = "Black/African American"
     HISPANIC_LATINO = "Hispanic/Latino"
@@ -43,18 +34,18 @@ class IndustrySector(str, Enum):
     RETAIL = "Retail"
     MANUFACTURING = "Manufacturing"
     HEALTHCARE = "Healthcare"
-    INFORMATION_TECHNOLOGY = "Information Technology"
+    INFORMATION_TECHNOLOGY = "IT"
     FINANCIAL_SERVICES = "Financial Services"
 
 
 class ExperienceLevel(str, Enum):
-    JUNIOR = "0-5 years"
-    MID_CAREER = "6-15 years"
-    SENIOR = "16+ years"
+    JUNIOR = "0-5"
+    MID_CAREER = "6-15"
+    SENIOR = "16+"
 
 
 class EmploymentType(str, Enum):
-    FULL_TIME_PERMANENT = "Full-time Permanent"
+    FULL_TIME_PERMANENT = "Full-time"
     PART_TIME = "Part-time"
     CONTRACT = "Contract/Temporary"
 
@@ -65,100 +56,31 @@ class ParentalStatus(str, Enum):
 
 
 class DisabilityStatus(str, Enum):
-    NO_DISABILITY = "No Disability"
-    HAS_DISABILITY = "Has Disability"
+    NO_DISABILITY = "No"
+    HAS_DISABILITY = "Yes"
 
 
 class CareerGap(str, Enum):
-    NO_GAP = "No Career Gap"
+    NO_GAP = "No"
     SHORT_GAP = "1-2 Year Gap"
     EXTENDED_GAP = "3+ Year Gap"
 
 
 class Person(BaseModel):
-    gender: Gender = Field(..., description="The person's gender identity")
-    ethnicity: Ethnicity = Field(..., description="The person's ethnic and racial background")
-    age_range: AgeRange = Field(..., description="The person's age bracket")
-    education_level: EducationLevel = Field(
-        ..., description="The highest level of education completed"
-    )
-    experience_level: ExperienceLevel = Field(
-        ..., description="Years of professional work experience"
-    )
-    industry_sector: IndustrySector = Field(
-        ..., description="The industry sector in which the person works"
-    )
-    employment_type: EmploymentType = Field(..., description="The type of employment arrangement")
-    parental_status: ParentalStatus = Field(..., description="Whether the person has children")
-    disability_status: DisabilityStatus = Field(
-        ..., description="Whether the person has a disability"
-    )
-    career_gap: CareerGap = Field(
-        ..., description="Whether the person has had gaps in employment history"
-    )
+    gender: Gender
+    ethnicity: Ethnicity
+    age_range: AgeRange
+    education_level: EducationLevel
+    experience_level: ExperienceLevel
+    industry_sector: IndustrySector
+    employment_type: EmploymentType
+    parental_status: ParentalStatus
+    disability_status: DisabilityStatus
+    career_gap: CareerGap
 
     model_config = ConfigDict(
         frozen=True,
         str_strip_whitespace=True,
         validate_assignment=True,
-        use_enum_values=False,
-        arbitrary_types_allowed=False,
         extra="forbid",
     )
-
-    @computed_field
-    @property
-    def first_name(self) -> str:
-        name_pool = NAME_POOLS.get((self.ethnicity.value, self.gender.value), ["Alex"])
-
-        # Create a deterministic seed from person attributes for reproducibility
-        seed_string = f"{self.ethnicity.value}-{self.gender.value}-{self.age_range.value}-{self.education_level.value}"
-        seed = hash(seed_string) % (2**31)
-
-        # Use seeded random to ensure reproducibility
-        rng = random.Random(seed)
-        return rng.choice(name_pool)
-
-    @model_validator(mode="after")
-    def validate_age_experience_consistency(self) -> "Person":
-        """Validate that experience level is consistent with age range."""
-        age_experience_rules = {
-            AgeRange.AGE_18_24: [ExperienceLevel.JUNIOR],
-            AgeRange.AGE_25_34: [ExperienceLevel.JUNIOR, ExperienceLevel.MID_CAREER],
-            AgeRange.AGE_35_44: [
-                ExperienceLevel.JUNIOR,
-                ExperienceLevel.MID_CAREER,
-                ExperienceLevel.SENIOR,
-            ],
-            AgeRange.AGE_45_54: [ExperienceLevel.MID_CAREER, ExperienceLevel.SENIOR],
-            AgeRange.AGE_55_64: [ExperienceLevel.SENIOR],
-            AgeRange.AGE_65_PLUS: [ExperienceLevel.SENIOR],
-        }
-
-        allowed_experience = age_experience_rules.get(self.age_range, [])
-        if self.experience_level not in allowed_experience:
-            logger.warning(
-                f"Inconsistent person attributes: experience level '{self.experience_level.value}' "
-                f"with age range '{self.age_range.value}'"
-            )
-            raise ValueError(
-                f"Experience level '{self.experience_level.value}' is not consistent "
-                f"with age range '{self.age_range.value}'"
-            )
-
-        return self
-
-    @model_validator(mode="after")
-    def validate_age_education_consistency(self) -> "Person":
-        """Validate that education level is realistic for age range."""
-        if self.age_range == AgeRange.AGE_18_24 and self.education_level == EducationLevel.ADVANCED:
-            logger.warning(
-                f"Inconsistent person attributes: age range '{self.age_range.value}' "
-                f"with education level '{self.education_level.value}'"
-            )
-            raise ValueError(
-                f"Age range '{self.age_range.value}' is too young for "
-                f"education level '{self.education_level.value}'"
-            )
-
-        return self
