@@ -33,5 +33,10 @@ class LLMResponse(BaseModel):
     raw_response: dict[str, Any] | None = Field(
         None, description="Complete raw response from provider for debugging", exclude=True
     )
+    
+    # Request payload for debugging and reproducibility
+    request_payload: dict[str, Any] | None = Field(
+        None, description="Complete request payload sent to provider for debugging and reproducibility", exclude=True
+    )
 
     model_config = ConfigDict(frozen=True, extra="forbid")

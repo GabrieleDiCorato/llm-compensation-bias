@@ -75,31 +75,27 @@ class GitHubConnector:
             "model": model_id,
         }
 
-        # Add generation parameters from provider settings if specified
-        if self.provider_settings.max_tokens is not None:
-            payload["max_tokens"] = self.provider_settings.max_tokens
-        if self.provider_settings.temperature is not None:
-            payload["temperature"] = self.provider_settings.temperature
-        if self.provider_settings.top_p is not None:
-            payload["top_p"] = self.provider_settings.top_p
-        if self.provider_settings.presence_penalty is not None:
-            payload["presence_penalty"] = self.provider_settings.presence_penalty
-        if self.provider_settings.frequency_penalty is not None:
-            payload["frequency_penalty"] = self.provider_settings.frequency_penalty
-        if self.provider_settings.stop is not None:
-            payload["stop"] = self.provider_settings.stop
-
-        # Adding backward-compatible additional settings or model-specific overrides, if they exist
+        # Merge provider settings with model-specific overrides
+        # Model settings take precedence, then filter out None values
+        generation_params = {
+            "max_tokens": self.provider_settings.max_tokens,
+            "temperature": self.provider_settings.temperature,
+            "top_p": self.provider_settings.top_p,
+            "presence_penalty": self.provider_settings.presence_penalty,
+            "frequency_penalty": self.provider_settings.frequency_penalty,
+            "stop": self.provider_settings.stop,
+        }
+        
+        # Apply model-specific overrides (if any)
         if self.model_settings.additional_settings:
-            payload.update(self.model_settings.additional_settings)
-
-        logger.debug(
-            f"Generation parameters: max_tokens={self.provider_settings.max_tokens}, "
-            f"temperature={self.provider_settings.temperature}, top_p={self.provider_settings.top_p}, "
-            f"presence_penalty={self.provider_settings.presence_penalty}, "
-            f"frequency_penalty={self.provider_settings.frequency_penalty}, stop={self.provider_settings.stop}"
-        )
-        logger.debug(f"Additional settings: {self.model_settings.additional_settings}")
+            generation_params.update(self.model_settings.additional_settings)
+            logger.debug(f"Model-specific overrides applied: {self.model_settings.additional_settings}")
+        
+        # Log final generation parameters
+        active_params = {k: v for k, v in generation_params.items() if v is not None}
+        if active_params:
+            logger.debug(f"Active generation parameters: {active_params}")
+            payload.update(active_params)
 
         try:
             with httpx.Client(timeout=self.timeout_sec) as client:
@@ -118,7 +114,7 @@ class GitHubConnector:
             logger.debug(f"Number of choices: {len(data.get('choices', []))}")
 
             # Parse GitHub-specific response into our generic format
-            return self._parse_github_response(data, model_id)
+            return self._parse_github_response(data, model_id, payload)
 
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error occurred: {e.response.status_code}")
@@ -177,7 +173,7 @@ class GitHubConnector:
             # Update the last request time after any delay
             self._rate_limit_trackers[provider_key] = time.time()
 
-    def _parse_github_response(self, data: dict, model_id: str) -> LLMResponse:
+    def _parse_github_response(self, data: dict, model_id: str, request_payload: dict) -> LLMResponse:
         """
         Parse GitHub API response into our generic LLMResponse format.
 
@@ -187,6 +183,7 @@ class GitHubConnector:
         Args:
             data: Raw response from GitHub API
             model_id: Model identifier
+            request_payload: The full request payload sent to the API
 
         Returns:
             Provider-agnostic LLMResponse
@@ -232,6 +229,7 @@ class GitHubConnector:
                 finish_reason=finish_reason,
                 metadata=metadata,
                 raw_response=data,  # Store complete response for debugging
+                request_payload=request_payload,  # Store complete request for reproducibility
             )
 
         except (KeyError, IndexError) as e:

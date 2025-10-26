@@ -1,6 +1,8 @@
+# The Person class and its Enum can be imported from src.model.person
+
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
+from pydantic import BaseModel, ConfigDict
 
 class Gender(str, Enum):
     MALE = "Male"

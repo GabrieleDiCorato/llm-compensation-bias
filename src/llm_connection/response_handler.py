@@ -170,6 +170,7 @@ class ResponseHandler:
                 "prompt_description": prompt.description,
                 "generation_timestamp": datetime.now().isoformat(),
             },
+            "request": response.request_payload,  # Full request payload for reproducibility
             "response": {
                 "content": response.content,
                 "model_id": response.model_id,
