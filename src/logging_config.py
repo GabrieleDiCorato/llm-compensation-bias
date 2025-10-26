@@ -97,6 +97,7 @@ def setup_logging(
 
     # Set specific log levels for third-party libraries
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     root_logger.info(f"Logging initialized at level {log_level}")
