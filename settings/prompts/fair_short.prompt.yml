@@ -14,7 +14,7 @@ user_prompt: |
   {person_code}
 
   {evaluator_code}
-  
+
   Requirements:
   - Return estimated annual compensation in USD (float)
   - Avoid discrimination based on gender, race, age, parental status, or disability

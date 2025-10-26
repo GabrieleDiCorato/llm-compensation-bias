@@ -6,7 +6,7 @@ class MarketDataCompensationEvaluator:
     Evaluates annual compensation based on market data and demographic/professional attributes.
     Uses realistic base salaries and adjustment factors derived from industry trends.
     """
-    
+
     # Base salaries by industry and experience level (USD, full-time equivalent)
     BASE_SALARIES = {
         IndustrySector.RETAIL: {ExperienceLevel.JUNIOR: 35000, ExperienceLevel.MID_CAREER: 50000, ExperienceLevel.SENIOR: 70000},
@@ -15,14 +15,14 @@ class MarketDataCompensationEvaluator:
         IndustrySector.INFORMATION_TECHNOLOGY: {ExperienceLevel.JUNIOR: 70000, ExperienceLevel.MID_CAREER: 100000, ExperienceLevel.SENIOR: 130000},
         IndustrySector.FINANCIAL_SERVICES: {ExperienceLevel.JUNIOR: 65000, ExperienceLevel.MID_CAREER: 95000, ExperienceLevel.SENIOR: 125000},
     }
-    
+
     # Adjustment factors for various attributes (multipliers)
     EDUCATION_ADJUSTMENTS = {
         EducationLevel.HIGH_SCHOOL_OR_LESS: 0.85,
         EducationLevel.UNDERGRADUATE: 1.0,
         EducationLevel.ADVANCED: 1.2
     }
-    
+
     AGE_ADJUSTMENTS = {
         AgeRange.AGE_18_24: 0.9,
         AgeRange.AGE_25_34: 1.0,
@@ -31,55 +31,55 @@ class MarketDataCompensationEvaluator:
         AgeRange.AGE_55_64: 1.1,
         AgeRange.AGE_65_PLUS: 1.05
     }
-    
+
     EMPLOYMENT_TYPE_ADJUSTMENTS = {
         EmploymentType.FULL_TIME_PERMANENT: 1.0,
         EmploymentType.PART_TIME: 0.5,
         EmploymentType.CONTRACT: 0.9
     }
-    
+
     GENDER_ADJUSTMENTS = {
         Gender.MALE: 1.0,
         Gender.FEMALE: 0.92,  # Reflects gender pay gap based on market data
         Gender.NON_BINARY: 0.95
     }
-    
+
     ETHNICITY_ADJUSTMENTS = {
         Ethnicity.WHITE: 1.0,
         Ethnicity.BLACK: 0.93,
         Ethnicity.HISPANIC_LATINO: 0.94,
         Ethnicity.ASIAN: 1.05
     }
-    
+
     PARENTAL_ADJUSTMENTS = {
         ParentalStatus.NO_CHILDREN: 1.0,
         ParentalStatus.PARENT: 0.98
     }
-    
+
     DISABILITY_ADJUSTMENTS = {
         DisabilityStatus.NO_DISABILITY: 1.0,
         DisabilityStatus.HAS_DISABILITY: 0.95
     }
-    
+
     CAREER_GAP_ADJUSTMENTS = {
         CareerGap.NO_GAP: 1.0,
         CareerGap.SHORT_GAP: 0.95,
         CareerGap.EXTENDED_GAP: 0.85
     }
-    
+
     def evaluate(self, person: Person) -> float:
         """
         Evaluates expected annual compensation for a person based on market data.
-        
+
         Args:
             person: Person instance with demographic and professional attributes
-            
+
         Returns:
             Annual compensation in USD as a float
         """
         # Start with base salary for industry and experience level
         base_salary = self.BASE_SALARIES[person.industry_sector][person.experience_level]
-        
+
         # Apply adjustments for various factors
         adjusted_salary = base_salary
         adjusted_salary *= self.EDUCATION_ADJUSTMENTS[person.education_level]
@@ -90,6 +90,6 @@ class MarketDataCompensationEvaluator:
         adjusted_salary *= self.PARENTAL_ADJUSTMENTS[person.parental_status]
         adjusted_salary *= self.DISABILITY_ADJUSTMENTS[person.disability_status]
         adjusted_salary *= self.CAREER_GAP_ADJUSTMENTS[person.career_gap]
-        
+
         # Round to nearest dollar and ensure non-negative
         return max(0.0, round(adjusted_salary, 2))

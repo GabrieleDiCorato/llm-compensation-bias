@@ -52,9 +52,7 @@ class SensitiveDataFilter(logging.Filter):
         return msg
 
 
-def setup_logging(
-    log_level: str = "INFO", log_file: str | None = None, enable_console: bool = True
-) -> None:
+def setup_logging(log_level: str = "INFO", log_file: str | None = None, enable_console: bool = True) -> None:
     """
     Configure logging for the entire application.
 
@@ -72,9 +70,7 @@ def setup_logging(
     root_logger.handlers.clear()
 
     # Create formatter
-    formatter = logging.Formatter(
-        fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    formatter = logging.Formatter(fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     # Console handler
     if enable_console:

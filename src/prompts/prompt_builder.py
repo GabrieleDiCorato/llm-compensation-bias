@@ -96,16 +96,12 @@ class PromptBuilder:
         """
         module = inspect.getmodule(cls)
         if module is None:
-            logger.warning(
-                f"Could not find module for {cls.__name__}, falling back to class source"
-            )
+            logger.warning(f"Could not find module for {cls.__name__}, falling back to class source")
             return inspect.getsource(cls)
 
         module_file = inspect.getsourcefile(module)
         if module_file is None:
-            logger.warning(
-                f"Could not find source file for module {module.__name__}, falling back to class source"
-            )
+            logger.warning(f"Could not find source file for module {module.__name__}, falling back to class source")
             return inspect.getsource(cls)
 
         logger.debug(f"Reading entire module file: {module_file}")

@@ -38,14 +38,10 @@ class ModelSettings(BaseModel):
     """Configuration for a specific LLM model."""
 
     model_id: str = Field(..., description="Model unique identifier (e.g., 'gpt-4o', 'claude-2')")
-    provider: str = Field(
-        ..., description="LLM provider name (e.g., 'openai', 'anthropic', 'github')"
-    )
+    provider: str = Field(..., description="LLM provider name (e.g., 'openai', 'anthropic', 'github')")
 
     # Optional model-specific settings (for backward compatibility or provider-specific options)
-    additional_settings: dict | None = Field(
-        default_factory=dict, description="Additional provider-specific settings"
-    )
+    additional_settings: dict | None = Field(default_factory=dict, description="Additional provider-specific settings")
 
     @field_validator("additional_settings", mode="before")
     @classmethod
@@ -58,9 +54,7 @@ class ProviderSettings(BaseModel):
     """Configuration for an LLM provider."""
 
     provider: str = Field(..., description="Provider name (e.g., 'openai', 'anthropic', 'github')")
-    api_key_name: str = Field(
-        ..., description="API key name to be loaded from the environment or secrets"
-    )
+    api_key_name: str = Field(..., description="API key name to be loaded from the environment or secrets")
     url: HttpUrl = Field(..., description="URL for the LLM API")
 
     # Rate limiting
@@ -114,20 +108,14 @@ class LlmSettings(BaseSettings):
 
     # MODELS SETTINGS
     # Configure LLM providers
-    providers: list[ProviderSettings] = Field(
-        default_factory=list, description="List of LLM provider configurations", min_length=1
-    )
+    providers: list[ProviderSettings] = Field(default_factory=list, description="List of LLM provider configurations", min_length=1)
     # Configure all available models
-    models_settings: list[ModelSettings] = Field(
-        default_factory=list, description="List of LLM model configurations", min_length=1
-    )
+    models_settings: list[ModelSettings] = Field(default_factory=list, description="List of LLM model configurations", min_length=1)
     # Must be a subset of models_settings
     enabled_models: list[str] = Field(default_factory=list, description="List of enabled model IDs")
 
     # PROMPTS
-    prompt_directory: str = Field(
-        "settings/prompts", description="Directory containing prompt YAML files"
-    )
+    prompt_directory: str = Field("settings/prompts", description="Directory containing prompt YAML files")
     prompt_strategies: list[str] = Field(default_factory=list)
 
     # OUTPUT
@@ -146,9 +134,7 @@ class LlmSettings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        logger.info(
-            f"LLM settings loaded: {len(self.providers)} providers, {len(self.models_settings)} models configured"
-        )
+        logger.info(f"LLM settings loaded: {len(self.providers)} providers, {len(self.models_settings)} models configured")
         logger.info(f"Enabled models: {', '.join(self.enabled_models)}")
         logger.info(f"Prompt strategies: {', '.join(self.prompt_strategies)}")
         logger.debug(f"Output directory: {self.output_dir}")

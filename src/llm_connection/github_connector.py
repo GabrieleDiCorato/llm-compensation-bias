@@ -85,12 +85,12 @@ class GitHubConnector:
             "frequency_penalty": self.provider_settings.frequency_penalty,
             "stop": self.provider_settings.stop,
         }
-        
+
         # Apply model-specific overrides (if any)
         if self.model_settings.additional_settings:
             generation_params.update(self.model_settings.additional_settings)
             logger.debug(f"Model-specific overrides applied: {self.model_settings.additional_settings}")
-        
+
         # Log final generation parameters
         active_params = {k: v for k, v in generation_params.items() if v is not None}
         if active_params:
@@ -164,10 +164,7 @@ class GitHubConnector:
             remaining_delay = self.provider_settings.rate_limit_delay - elapsed
 
             if remaining_delay > 0:
-                logger.debug(
-                    f"Rate limiting: waiting {remaining_delay:.2f} seconds before next request "
-                    f"(provider: {self.provider_settings.provider})"
-                )
+                logger.debug(f"Rate limiting: waiting {remaining_delay:.2f} seconds before next request " f"(provider: {self.provider_settings.provider})")
                 time.sleep(remaining_delay)
 
             # Update the last request time after any delay
@@ -216,11 +213,7 @@ class GitHubConnector:
             logger.debug(f"Response content length: {len(content)} characters")
 
             if usage:
-                logger.debug(
-                    f"Token breakdown - Prompt: {metadata['prompt_tokens']}, "
-                    f"Completion: {metadata['completion_tokens']}, "
-                    f"Total: {total_tokens}"
-                )
+                logger.debug(f"Token breakdown - Prompt: {metadata['prompt_tokens']}, " f"Completion: {metadata['completion_tokens']}, " f"Total: {total_tokens}")
 
             return LLMResponse(
                 content=content,

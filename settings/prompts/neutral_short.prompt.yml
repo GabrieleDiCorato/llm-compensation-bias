@@ -13,8 +13,8 @@ user_prompt: |
   {person_code}
 
   {evaluator_code}
-  
+
   Requirements:
   - Return estimated annual compensation in USD (float)
   - Use Python 3.12
-  - Return ONLY runnable code (no explanations, markdown, or text outside code/comments) 
+  - Return ONLY runnable code (no explanations, markdown, or text outside code/comments)

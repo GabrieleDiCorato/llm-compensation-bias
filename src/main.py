@@ -89,9 +89,7 @@ class ExperimentRunner:
             logger.info(f"Creating connector for model: {model_id}")
 
             # Extract provider from model settings
-            model_cfg = next(
-                (m for m in self.settings.models_settings if m.model_id == model_id), None
-            )
+            model_cfg = next((m for m in self.settings.models_settings if m.model_id == model_id), None)
             if not model_cfg:
                 logger.error(f"Model {model_id} not found in settings")
                 return False
@@ -103,16 +101,11 @@ class ExperimentRunner:
             logger.info(f"Querying model: {model_id}")
             response = connector.query(prompt, provider_id, model_id)
 
-            logger.info(
-                f"Received response: {len(response.content)} characters, "
-                f"{response.tokens_used or 'unknown'} tokens"
-            )
+            logger.info(f"Received response: {len(response.content)} characters, " f"{response.tokens_used or 'unknown'} tokens")
 
             # Process and save response
             logger.info("Processing and saving response")
-            code_path, metadata_path = self.response_handler.process_response(
-                response=response, prompt=prompt, model_id=model_id, provider_id=provider_id
-            )
+            code_path, metadata_path = self.response_handler.process_response(response=response, prompt=prompt, model_id=model_id, provider_id=provider_id)
 
             logger.info(f"Experiment successful: {code_path.name}")
             self.stats["successful"] += 1
@@ -158,9 +151,7 @@ class ExperimentRunner:
 
         return results
 
-    def run_all(
-        self, models: list[str] | None = None, strategies: list[str] | None = None
-    ) -> dict[str, dict[str, bool]]:
+    def run_all(self, models: list[str] | None = None, strategies: list[str] | None = None) -> dict[str, dict[str, bool]]:
         """
         Run experiments for all specified models and strategies.
 
@@ -265,9 +256,7 @@ def main() -> int:
         logger.info("Experiment Configuration:")
         logger.info(f"  Models: {', '.join(settings.enabled_models)}")
         logger.info(f"  Strategies: {', '.join(settings.prompt_strategies)}")
-        logger.info(
-            f"  Total experiments: {len(settings.enabled_models) * len(settings.prompt_strategies)}"
-        )
+        logger.info(f"  Total experiments: {len(settings.enabled_models) * len(settings.prompt_strategies)}")
         logger.info(f"  Output directory: {settings.output_dir}")
         logger.info("-" * 60)
 

@@ -34,9 +34,7 @@ def create_connector(model_id: str, settings: LlmSettings, secrets: SecretSettin
     provider_cfg = next((p for p in settings.providers if p.provider == model_cfg.provider), None)
     if provider_cfg is None:
         logger.error(f"Provider {model_cfg.provider} for model {model_id} not found in settings")
-        raise ValueError(
-            f"Provider {model_cfg.provider} for model {model_id} not found in settings."
-        )
+        raise ValueError(f"Provider {model_cfg.provider} for model {model_id} not found in settings.")
 
     logger.debug(f"Provider configuration found: {provider_cfg.provider}")
 
@@ -50,6 +48,4 @@ def create_connector(model_id: str, settings: LlmSettings, secrets: SecretSettin
         )
     else:
         logger.error(f"Unknown provider type: {provider_cfg.provider}")
-        raise ValueError(
-            f"Unknown provider type: {provider_cfg.provider}. Supported providers: github"
-        )
+        raise ValueError(f"Unknown provider type: {provider_cfg.provider}. Supported providers: github")

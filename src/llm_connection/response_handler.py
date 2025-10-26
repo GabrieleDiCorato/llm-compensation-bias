@@ -70,9 +70,7 @@ class ResponseHandler:
             logger.debug("Python syntax validation passed")
         except SyntaxError as e:
             logger.error(f"Syntax error in generated code: line {e.lineno}, {e.msg}")
-            raise CodeValidationError(
-                f"Generated code has syntax error at line {e.lineno}: {e.msg}"
-            ) from e
+            raise CodeValidationError(f"Generated code has syntax error at line {e.lineno}: {e.msg}") from e
 
     def generate_filename(
         self,
@@ -191,9 +189,7 @@ class ResponseHandler:
             logger.error(f"Failed to save metadata: {e}")
             raise
 
-    def process_response(
-        self, response: LLMResponse, prompt: RenderedPrompt, model_id: str, provider_id: str
-    ) -> tuple[Path, Path]:
+    def process_response(self, response: LLMResponse, prompt: RenderedPrompt, model_id: str, provider_id: str) -> tuple[Path, Path]:
         """
         Process an LLM response: validate, save code, and save metadata.
 

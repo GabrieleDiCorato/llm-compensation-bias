@@ -15,7 +15,6 @@ not to reinforce stereotypes.
 # Keys are string tuples to avoid circular imports with person.py
 import random
 
-
 NAME_POOLS: dict[tuple[str, str], list[str]] = {
     # White names - Common Anglo-Saxon names
     ("White", "Male"): [
@@ -167,11 +166,12 @@ NAME_POOLS: dict[tuple[str, str], list[str]] = {
     ],
 }
 
+
 @staticmethod
 def first_name(cls, ethnicity: str, gender: str, age_range: str, education_level: str) -> str:
     name_pool = NAME_POOLS.get((ethnicity, gender))
     if not name_pool:
         raise ValueError(f"No name pool found for ethnicity: {ethnicity}, gender: {gender}")
-    
+
     rng = random.Random()
     return rng.choice(name_pool)

@@ -16,9 +16,7 @@ class PromptTemplate(BaseModel):
     """
 
     # Mandatory fields
-    system_prompt: str = Field(
-        ..., description="System-level instructions for the LLM", min_length=1
-    )
+    system_prompt: str = Field(..., description="System-level instructions for the LLM", min_length=1)
     user_prompt: str = Field(
         ...,
         description="User query template with placeholders like \\{person_code}, \\{evaluator_code}",
@@ -30,9 +28,7 @@ class PromptTemplate(BaseModel):
         None,
         description="Internal name of the prompt strategy (e.g., 'neutral', 'fair', 'realistic')",
     )
-    description: str | None = Field(
-        None, description="Human-readable description of this prompt's purpose"
-    )
+    description: str | None = Field(None, description="Human-readable description of this prompt's purpose")
     version: str | None = Field(None, description="Version string for this prompt template")
 
     model_config = ConfigDict(
