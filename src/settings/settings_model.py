@@ -62,6 +62,13 @@ class ProviderSettings(BaseModel):
         ..., description="API key name to be loaded from the environment or secrets"
     )
     url: HttpUrl = Field(..., description="URL for the LLM API")
+    
+    # Rate limiting
+    rate_limit_delay: float | None = Field(
+        None,
+        description="Minimum delay in seconds between consecutive requests to this provider. Use this to throttle API calls and avoid rate limits.",
+        ge=0.0,
+    )
 
     # Generation parameters (applied to all models using this provider)
     max_tokens: int | None = Field(

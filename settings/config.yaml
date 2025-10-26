@@ -6,6 +6,7 @@ providers:
   - provider: "github"
     api_key_name: "GITHUB_TOKEN"
     url: "https://models.github.ai/inference/chat/completions"
+    rate_limit_delay: 60.0     # Minimum delay in seconds between requests (throttling)
     # Generation parameters (applied to all models using this provider)
     temperature: 0.3          # Randomness (0.0-1.0): lower = more deterministic
     top_p: 0.95               # Nucleus sampling (0.0-1.0): lower = less diverse
@@ -41,7 +42,7 @@ models_settings:
 
 # Enabled Models (subset of models_settings)
 enabled_models:
-  - "openai/gpt-5-mini"
+  #- "openai/gpt-5-nano"
   #- "openai/gpt-4.1"
   - "DeepSeek-R1-0528"
   #- "xai/grok-3"
