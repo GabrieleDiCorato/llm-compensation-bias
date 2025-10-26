@@ -62,7 +62,7 @@ class ProviderSettings(BaseModel):
         ..., description="API key name to be loaded from the environment or secrets"
     )
     url: HttpUrl = Field(..., description="URL for the LLM API")
-    
+
     # Rate limiting
     rate_limit_delay: float | None = Field(
         None,

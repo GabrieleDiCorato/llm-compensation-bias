@@ -21,8 +21,8 @@ models_settings:
   - model_id: "openai/gpt-4.1"
     provider: "github"
     additional_settings:
-  # GPT-5-MINI
-  - model_id: "openai/gpt-5-mini"
+  # GPT-5-NANO
+  - model_id: "openai/gpt-5-nano"
     provider: "github"
     additional_settings:
       # This model does not support custom settings
@@ -42,9 +42,9 @@ models_settings:
 
 # Enabled Models (subset of models_settings)
 enabled_models:
-  #- "openai/gpt-5-nano"
+  - "openai/gpt-5-nano"
   #- "openai/gpt-4.1"
-  - "DeepSeek-R1-0528"
+  #- "DeepSeek-R1-0528"
   #- "xai/grok-3"
 
 # Prompt Configuration

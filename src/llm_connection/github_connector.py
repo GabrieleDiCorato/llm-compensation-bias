@@ -3,6 +3,8 @@ GitHub Models API connector implementation.
 """
 
 import logging
+import threading
+import time
 
 import httpx
 
@@ -15,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 class GitHubConnector:
     """GitHub Models API implementation of LLMConnector protocol."""
+
+    # Class-level dictionary to track last request time per provider URL
+    # This ensures rate limiting works across all connector instances for the same provider
+    _rate_limit_trackers: dict[str, float] = {}
+    _rate_limit_lock = threading.Lock()
 
     def __init__(
         self,
@@ -38,6 +45,8 @@ class GitHubConnector:
         logger.info(f"GitHubConnector initialized for model: {model_settings.model_id}")
         logger.debug(f"Provider URL: {provider_settings.url}")
         logger.debug(f"Timeout: {timeout_sec} seconds")
+        if provider_settings.rate_limit_delay:
+            logger.debug(f"Rate limit delay: {provider_settings.rate_limit_delay} seconds")
 
     def query(self, prompt: RenderedPrompt, provider_id: str, model_id: str) -> LLMResponse:
         """
@@ -51,6 +60,9 @@ class GitHubConnector:
         Returns:
             LLMResponse with content and metadata
         """
+        # Apply rate limiting if configured
+        self._apply_rate_limit()
+
         logger.info(f"Sending query to model: {model_id} (strategy: {prompt.strategy_name})")
         logger.debug(f"System prompt length: {len(prompt.system_prompt)} characters")
         logger.debug(f"User prompt length: {len(prompt.user_prompt)} characters")
@@ -128,6 +140,42 @@ class GitHubConnector:
         except Exception as e:
             logger.error(f"Unexpected error during query: {type(e).__name__}: {str(e)}")
             raise
+
+    def _apply_rate_limit(self) -> None:
+        """
+        Apply rate limiting by waiting if necessary between consecutive requests.
+
+        Uses a class-level tracker keyed by provider URL to ensure rate limiting
+        works across all connector instances for the same provider.
+        Thread-safe using a lock to prevent race conditions.
+        """
+        if self.provider_settings.rate_limit_delay is None:
+            return
+
+        provider_key = str(self.provider_settings.url)
+
+        with self._rate_limit_lock:
+            current_time = time.time()
+            last_request_time = self._rate_limit_trackers.get(provider_key)
+
+            if last_request_time is None:
+                # First request for this provider
+                self._rate_limit_trackers[provider_key] = current_time
+                logger.debug(f"Rate limiter initialized for provider: {self.provider_settings.provider}")
+                return
+
+            elapsed = current_time - last_request_time
+            remaining_delay = self.provider_settings.rate_limit_delay - elapsed
+
+            if remaining_delay > 0:
+                logger.debug(
+                    f"Rate limiting: waiting {remaining_delay:.2f} seconds before next request "
+                    f"(provider: {self.provider_settings.provider})"
+                )
+                time.sleep(remaining_delay)
+
+            # Update the last request time after any delay
+            self._rate_limit_trackers[provider_key] = time.time()
 
     def _parse_github_response(self, data: dict, model_id: str) -> LLMResponse:
         """
