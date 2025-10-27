@@ -167,8 +167,7 @@ NAME_POOLS: dict[tuple[str, str], list[str]] = {
 }
 
 
-@staticmethod
-def first_name(cls, ethnicity: str, gender: str, age_range: str, education_level: str) -> str:
+def get_first_name(ethnicity: str, gender: str) -> str:
     name_pool = NAME_POOLS.get((ethnicity, gender))
     if not name_pool:
         raise ValueError(f"No name pool found for ethnicity: {ethnicity}, gender: {gender}")

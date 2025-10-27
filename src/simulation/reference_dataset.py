@@ -26,6 +26,7 @@ from src.model.person import (
     ParentalStatus,
     Person,
 )
+from src.simulation.name_pools import get_first_name
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +206,8 @@ class ReferenceDatasetGenerator:
 
             # Override with stratum-specific values
             attributes.update(stratum_spec)
+            # Assign a random first name
+            attributes["first_name"] = get_first_name(attributes["ethnicity"], attributes["gender"])
 
             person = Person(**attributes)
 
@@ -229,21 +232,11 @@ class ReferenceDatasetGenerator:
             True if combination is realistic, False otherwise
         """
         # Age-experience consistency: younger people can't have extensive experience
-        age_to_max_experience = {
-            AgeRange.AGE_18_24: ExperienceLevel.JUNIOR,  # Max 5 years
-            AgeRange.AGE_25_34: ExperienceLevel.MID_CAREER,  # Max 15 years
-            AgeRange.AGE_35_44: ExperienceLevel.SENIOR,  # Can have 16+
-            AgeRange.AGE_45_54: ExperienceLevel.SENIOR,
-            AgeRange.AGE_55_64: ExperienceLevel.SENIOR,
-            AgeRange.AGE_65_PLUS: ExperienceLevel.SENIOR,
-        }
-
-        max_allowed_exp = age_to_max_experience.get(person.age_range)
-        if max_allowed_exp:
-            # Compare experience levels by their position in the enum
-            person_exp_index = list(ExperienceLevel).index(person.experience_level)
-            max_exp_index = list(ExperienceLevel).index(max_allowed_exp)
-            if person_exp_index > max_exp_index:
+        if person.age_range == AgeRange.AGE_18_24 or person.age_range == AgeRange.AGE_25_34:
+            if person.experience_level not in [
+                ExperienceLevel.JUNIOR,
+                ExperienceLevel.MID_CAREER,
+            ]:
                 return False
 
         # Age-education plausibility: advanced degrees unlikely for very young
@@ -462,26 +455,6 @@ def generate_reference_dataset(
 
     Returns:
         List of Person instances with stratified distribution
-
-    Example:
-        >>> # Generate 108 instances stratified by gender, ethnicity, education
-        >>> # (3 genders × 4 ethnicities × 3 education levels = 36 strata, 3 samples per stratum)
-        >>> dataset = generate_reference_dataset(size=108)
-        >>> len(dataset)
-        108
-        >>>
-        >>> # Verify balanced distribution
-        >>> generator = ReferenceDatasetGenerator(seed=42)
-        >>> dist = generator.compute_distribution(dataset)
-        >>> dist['gender']['proportions']
-        {'Male': 0.333, 'Female': 0.333, 'Non-binary': 0.333}
-        >>>
-        >>> # Generate with custom stratification
-        >>> dataset = generate_reference_dataset(
-        ...     size=200,
-        ...     stratify_by=['gender', 'industry_sector'],
-        ...     seed=42
-        ... )
     """
     generator = ReferenceDatasetGenerator(seed=seed)
 

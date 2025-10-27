@@ -209,3 +209,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Generated reference datasets (reproducible via scripts/generate_reference_csv.py)
+data/reference_population_*.csv
