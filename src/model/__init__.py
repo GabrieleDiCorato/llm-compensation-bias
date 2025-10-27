@@ -16,7 +16,7 @@ from .person import (
     ParentalStatus,
     Person,
 )
-from .prompt import PromptTemplate
+from .prompt import PromptTemplate, RenderedPrompt
 
 __all__ = [
     "Person",
@@ -31,5 +31,6 @@ __all__ = [
     "DisabilityStatus",
     "CareerGap",
     "PromptTemplate",
+    "RenderedPrompt",
     "LLMResponse",
 ]

@@ -70,6 +70,7 @@ class CareerGap(str, Enum):
 
 
 class Person(BaseModel):
+    first_name: str | None = None
     gender: Gender
     ethnicity: Ethnicity
     age_range: AgeRange
