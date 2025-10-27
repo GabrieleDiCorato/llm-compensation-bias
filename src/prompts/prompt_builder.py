@@ -21,6 +21,26 @@ class PromptBuilder:
     substitutes them into prompt templates to create final prompts for LLM connectors.
     """
 
+    def __init__(self) -> None:
+        # Extract entire person.py file (includes all Enums and the Person class)
+        self.person_code = self._extract_module_code(Person)
+        # Extract just the CompensationEvaluator protocol
+        self.evaluator_code = self._extract_source_code(CompensationEvaluator)
+
+        logger.info(f"Extracted person.py module: {len(self.person_code)} characters")
+        logger.info(f"Extracted CompensationEvaluator code: {len(self.evaluator_code)} characters")
+
+        # Escape curly braces in the code by doubling them for .format()
+        # This prevents Python f-strings in the code from being interpreted as format placeholders
+        person_code_escaped = self.person_code.replace("{", "{{").replace("}", "}}")
+        evaluator_code_escaped = self.evaluator_code.replace("{", "{{").replace("}", "}}")
+
+        self.substitutions = {
+            "person_code": person_code_escaped,
+            "evaluator_code": evaluator_code_escaped,
+        }
+        logger.debug("Completed code extraction and escaping for prompt substitutions.")
+
     def build_prompt(self, template: PromptTemplate) -> RenderedPrompt:
         """
         Build a complete prompt from a template by substituting code placeholders.
@@ -39,26 +59,8 @@ class PromptBuilder:
         """
         logger.debug(f"Building prompt for strategy: {template.strategy_name}")
 
-        # Extract entire person.py file (includes all Enums and the Person class)
-        person_code = self._extract_module_code(Person)
-        # Extract just the CompensationEvaluator protocol
-        evaluator_code = self._extract_source_code(CompensationEvaluator)
-
-        logger.debug(f"Extracted person.py module: {len(person_code)} characters")
-        logger.debug(f"Extracted CompensationEvaluator code: {len(evaluator_code)} characters")
-
-        # Escape curly braces in the code by doubling them for .format()
-        # This prevents Python f-strings in the code from being interpreted as format placeholders
-        person_code_escaped = person_code.replace("{", "{{").replace("}", "}}")
-        evaluator_code_escaped = evaluator_code.replace("{", "{{").replace("}", "}}")
-
-        substitutions = {
-            "person_code": person_code_escaped,
-            "evaluator_code": evaluator_code_escaped,
-        }
-
-        system_prompt = template.system_prompt.format(**substitutions)
-        user_prompt = template.user_prompt.format(**substitutions)
+        system_prompt = template.system_prompt.format(**self.substitutions)
+        user_prompt = template.user_prompt.format(**self.substitutions)
 
         # This also validates that no placeholders remain
         rendered = RenderedPrompt(
@@ -70,8 +72,20 @@ class PromptBuilder:
         )
 
         logger.info(f"Successfully built prompt for strategy: {template.strategy_name}")
+
+        # Estimate token usage with different rates for natural language vs code
+        # Natural language (template text): ~1 token per 4 chars
+        # Code (person.py + evaluator.py): ~1 token per 2.5 chars (code is more dense)
+        template_chars = len(template.system_prompt) + len(template.user_prompt)
+        code_chars = len(self.person_code) + len(self.evaluator_code)
+
+        template_tokens = template_chars // 4
+        code_tokens = code_chars // 2.5
+        estimated_total_tokens = int(template_tokens + code_tokens)
+
         logger.debug(f"System prompt length: {len(system_prompt)} characters")
         logger.debug(f"User prompt length: {len(user_prompt)} characters")
+        logger.debug(f"Estimated input tokens: ~{estimated_total_tokens} " f"(~{template_tokens} from template, ~{int(code_tokens)} from code)")
 
         return rendered
 
