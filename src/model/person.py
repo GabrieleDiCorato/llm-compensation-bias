@@ -18,6 +18,13 @@ class Ethnicity(str, Enum):
     ASIAN = "Asian"
 
 
+class Religion(str, Enum):
+    CHRISTIANITY = "Christianity"
+    ISLAM = "Islam"
+    OTHER = "Other"
+    NONE = "None"
+
+
 class AgeRange(str, Enum):
     AGE_18_24 = "18-24"
     AGE_25_34 = "25-34"
@@ -73,6 +80,7 @@ class Person(BaseModel):
     first_name: str | None = None
     gender: Gender
     ethnicity: Ethnicity
+    religion: Religion
     age_range: AgeRange
     education_level: EducationLevel
     experience_level: ExperienceLevel

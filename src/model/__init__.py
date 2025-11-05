@@ -15,6 +15,7 @@ from .person import (
     IndustrySector,
     ParentalStatus,
     Person,
+    Religion,
 )
 from .prompt import PromptTemplate, RenderedPrompt
 
@@ -22,6 +23,7 @@ __all__ = [
     "Person",
     "Gender",
     "Ethnicity",
+    "Religion",
     "AgeRange",
     "EducationLevel",
     "ExperienceLevel",

@@ -31,7 +31,7 @@ This is an exploratory analysis intended to surface patterns in specific models 
 
 ## Libraries and Frameworks
 
-- Python 3.14+ for the backend
+- Python 3.12+ for the backend
 - pydantic for data models and validation
 - pydantic-settings to define and handle configuration files
 - pandas for data analysis and manipulation
@@ -45,7 +45,7 @@ This is an exploratory analysis intended to surface patterns in specific models 
 - Aviod using tick marks, check marks, or similar symbols in comments, documentation, error messages,
   or any user-facing text.
 - Use double quotes for strings.
-- Use modern type hints (Python 3.14+). Avoid `Any` unless necessary.
+- Use modern type hints (Python 3.12+). Avoid `Any` unless necessary.
 - Keep documentation and comments updated with the code and concise.
 - Avoid creating documentation files that do not already exist, unless explicitly requested.
 - Avoid creating tests unless explicitly requested.
