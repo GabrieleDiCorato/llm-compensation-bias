@@ -80,7 +80,7 @@ class Person(BaseModel):
     first_name: str | None = None
     gender: Gender
     ethnicity: Ethnicity
-    religion: Religion
+    religion: Religion | None = None
     age_range: AgeRange
     education_level: EducationLevel
     experience_level: ExperienceLevel

@@ -26,8 +26,9 @@ This is an exploratory analysis intended to surface patterns in specific models 
   - `/prompts`: Prompt management components for loading and structuring LLM prompts.
   - `/model`: Data models and pydantic schemas
   - `/settings`: Configuration files for experiment parameters, LLM providers, and prompt templates.
+  - `/auto-generated`: Auto-generated code from LLMs.
+- `/notebooks`: Jupyter notebooks for exploratory data analysis and visualization.
 - `/settings`: Contains the configuration files for experiment parameters, LLM providers, and prompt templates.
-- `/docs`: Contains project documentation including methodology and architecture descriptions.
 
 ## Libraries and Frameworks
 
